@@ -1,0 +1,287 @@
+import type {
+  DocumentRecord,
+  ExtractionMeta,
+  Fact,
+  Patient,
+} from "@/lib/types";
+
+export const PATIENT: Patient = {
+  id: "patient-sana-ahmed",
+  displayName: "Sana Ahmed",
+  fictional: true,
+  city: "Lahore",
+  focus: "Diabetes follow-up",
+};
+
+export const CACHED_EXTRACTION: ExtractionMeta = {
+  method: "cached_demo",
+  label: "Demo extraction",
+  disclosure:
+    "Demo extraction. No document was sent to an AI provider. These fields are a cached extraction shipped with the fictional documents. A valid structure is not proof the facts are correct. Confirm or correct each field before it is treated as confirmed.",
+};
+
+const patientId = PATIENT.id;
+
+function metaFacts(
+  documentId: string,
+  date: string,
+  documentType: string,
+  facility: string,
+  sourceRef: string,
+): Fact[] {
+  return [
+    {
+      id: `${documentId}-date`,
+      documentId,
+      patientId,
+      kind: "document_date",
+      label: "Document date",
+      textValue: date,
+      status: "proposed",
+      patientMarkedCurrent: null,
+      sourceQuote: `Document date: ${date}`,
+      sourceRef,
+    },
+    {
+      id: `${documentId}-type`,
+      documentId,
+      patientId,
+      kind: "document_type",
+      label: "Document type",
+      textValue: documentType,
+      status: "proposed",
+      patientMarkedCurrent: null,
+      sourceQuote: `Document type: ${documentType}`,
+      sourceRef,
+    },
+    {
+      id: `${documentId}-facility`,
+      documentId,
+      patientId,
+      kind: "facility",
+      label: "Facility",
+      textValue: facility,
+      status: "proposed",
+      patientMarkedCurrent: null,
+      sourceQuote: facility,
+      sourceRef,
+    },
+  ];
+}
+
+export function createFictionalRecords(): {
+  documents: DocumentRecord[];
+  facts: Fact[];
+  extraction: ExtractionMeta;
+} {
+  const documents: DocumentRecord[] = [
+    {
+      id: "doc-al-noor",
+      patientId,
+      documentDate: "2026-01-12",
+      documentType: "prescription",
+      facilityName: "Al-Noor Clinic",
+      facilityCity: "Lahore",
+      title: "Outpatient prescription",
+      clinician: "Dr. Hina Qureshi (fictional)",
+      extractionMethod: "cached_demo",
+      uploadFilename: null,
+      uploadMime: null,
+    },
+    {
+      id: "doc-lahore-city-lab",
+      patientId,
+      documentDate: "2026-01-18",
+      documentType: "lab_report",
+      facilityName: "Lahore City Lab",
+      facilityCity: "Lahore",
+      title: "Clinical chemistry report",
+      clinician: null,
+      extractionMethod: "cached_demo",
+      uploadFilename: null,
+      uploadMime: null,
+    },
+    {
+      id: "doc-medicare",
+      patientId,
+      documentDate: "2026-04-14",
+      documentType: "lab_report",
+      facilityName: "Medicare Diagnostics",
+      facilityCity: "Lahore",
+      title: "HbA1c report",
+      clinician: null,
+      extractionMethod: "cached_demo",
+      uploadFilename: null,
+      uploadMime: null,
+    },
+    {
+      id: "doc-shifa",
+      patientId,
+      documentDate: "2026-07-22",
+      documentType: "prescription_with_lab",
+      facilityName: "Shifa Community Clinic",
+      facilityCity: "Lahore",
+      title: "Prescription with attached lab",
+      clinician: "Dr. Faraz Malik (fictional)",
+      extractionMethod: "cached_demo",
+      uploadFilename: null,
+      uploadMime: null,
+    },
+  ];
+
+  const facts: Fact[] = [
+    ...metaFacts(
+      "doc-al-noor",
+      "2026-01-12",
+      "Prescription",
+      "Al-Noor Clinic, Lahore",
+      "Al-Noor Clinic prescription, 12 Jan 2026",
+    ),
+    {
+      id: "fact-al-noor-metformin",
+      documentId: "doc-al-noor",
+      patientId,
+      kind: "medication",
+      label: "Metformin",
+      medicationName: "Metformin",
+      doseText: "500 mg",
+      frequencyText: "twice daily",
+      status: "proposed",
+      patientMarkedCurrent: null,
+      sourceQuote: "Tab. Metformin 500 mg — twice daily",
+      sourceRef: "Al-Noor Clinic prescription, 12 Jan 2026",
+    },
+    {
+      id: "fact-al-noor-followup",
+      documentId: "doc-al-noor",
+      patientId,
+      kind: "follow_up",
+      label: "Follow-up",
+      instructionText: "Follow-up HbA1c in 3 months",
+      status: "proposed",
+      patientMarkedCurrent: null,
+      sourceQuote: "Follow-up: HbA1c in 3 months",
+      sourceRef: "Al-Noor Clinic prescription, 12 Jan 2026",
+    },
+    ...metaFacts(
+      "doc-lahore-city-lab",
+      "2026-01-18",
+      "Lab report",
+      "Lahore City Lab, Lahore",
+      "Lahore City Lab report, 18 Jan 2026",
+    ),
+    {
+      id: "fact-lcl-hba1c",
+      documentId: "doc-lahore-city-lab",
+      patientId,
+      kind: "measurement",
+      label: "HbA1c",
+      analyte: "hba1c",
+      value: 7.2,
+      unit: "%",
+      status: "proposed",
+      patientMarkedCurrent: null,
+      sourceQuote: "HbA1c 7.2 %",
+      sourceRef: "Lahore City Lab report, 18 Jan 2026",
+    },
+    {
+      id: "fact-lcl-glucose",
+      documentId: "doc-lahore-city-lab",
+      patientId,
+      kind: "measurement",
+      label: "Fasting glucose",
+      analyte: "fasting_glucose",
+      value: 136,
+      unit: "mg/dL",
+      status: "proposed",
+      patientMarkedCurrent: null,
+      sourceQuote: "Fasting glucose 136 mg/dL",
+      sourceRef: "Lahore City Lab report, 18 Jan 2026",
+    },
+    ...metaFacts(
+      "doc-medicare",
+      "2026-04-14",
+      "Lab report",
+      "Medicare Diagnostics, Lahore",
+      "Medicare Diagnostics report, 14 Apr 2026",
+    ),
+    {
+      id: "fact-medicare-hba1c",
+      documentId: "doc-medicare",
+      patientId,
+      kind: "measurement",
+      label: "HbA1c",
+      analyte: "hba1c",
+      value: 8.1,
+      unit: "%",
+      status: "proposed",
+      patientMarkedCurrent: null,
+      sourceQuote: "HbA1c 8.1 %",
+      sourceRef: "Medicare Diagnostics report, 14 Apr 2026",
+    },
+    ...metaFacts(
+      "doc-shifa",
+      "2026-07-22",
+      "Prescription with attached lab",
+      "Shifa Community Clinic, Lahore",
+      "Shifa Community Clinic note, 22 Jul 2026",
+    ),
+    {
+      id: "fact-shifa-hba1c",
+      documentId: "doc-shifa",
+      patientId,
+      kind: "measurement",
+      label: "HbA1c",
+      analyte: "hba1c",
+      value: 9.0,
+      unit: "%",
+      status: "proposed",
+      patientMarkedCurrent: null,
+      sourceQuote: "HbA1c 9.0 %",
+      sourceRef: "Shifa Community Clinic note, 22 Jul 2026",
+    },
+    {
+      id: "fact-shifa-metformin",
+      documentId: "doc-shifa",
+      patientId,
+      kind: "medication",
+      label: "Metformin",
+      medicationName: "Metformin",
+      doseText: "1000 mg",
+      frequencyText: "twice daily",
+      status: "proposed",
+      patientMarkedCurrent: null,
+      sourceQuote: "Tab. Metformin 1000 mg — twice daily",
+      sourceRef: "Shifa Community Clinic note, 22 Jul 2026",
+    },
+  ];
+
+  return { documents, facts, extraction: CACHED_EXTRACTION };
+}
+
+export const BUNDLED_INDEX = [
+  {
+    id: "doc-al-noor",
+    date: "12 Jan 2026",
+    facility: "Al-Noor Clinic, Lahore",
+    document: "Prescription",
+  },
+  {
+    id: "doc-lahore-city-lab",
+    date: "18 Jan 2026",
+    facility: "Lahore City Lab",
+    document: "Lab report",
+  },
+  {
+    id: "doc-medicare",
+    date: "14 Apr 2026",
+    facility: "Medicare Diagnostics",
+    document: "Lab report",
+  },
+  {
+    id: "doc-shifa",
+    date: "22 Jul 2026",
+    facility: "Shifa Community Clinic",
+    document: "Prescription with attached lab",
+  },
+] as const;
