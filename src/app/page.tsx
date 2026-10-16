@@ -87,7 +87,7 @@ export default function VerifyPage() {
               Load fictional records
             </Button>
             <p className="mt-2 text-sm text-muted-foreground">
-              Loading uses disclosed cached extraction. No API key is required, and no model is called.
+              Loading uses the saved extraction. No API key is required, and no model is called.
             </p>
           </div>
 
@@ -124,7 +124,7 @@ export default function VerifyPage() {
                     </Button>
                   ) : (
                     <p className="mt-2 font-medium">
-                      No GEMINI_API_KEY is set on the server. This file will not be sent. Load the fictional set for the demo.
+                      No GEMINI_API_KEY is set. This file will not be sent. The fictional demo uses the saved extraction.
                     </p>
                   )}
                   {uploadError ? <p className="mt-2 text-destructive">{uploadError}</p> : null}

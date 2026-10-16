@@ -1,5 +1,6 @@
+import { requireUser } from "@/lib/auth";
 import { extractWithGemini } from "@/lib/gemini";
-import { fail, ok } from "@/lib/http";
+import { fail, failFrom, ok } from "@/lib/http";
 import { present } from "@/lib/present";
 import { saveUpload, withSession } from "@/lib/store";
 
@@ -15,9 +16,15 @@ const ALLOWED = new Set([
 const MAX_BYTES = 4 * 1024 * 1024;
 
 export async function POST(request: Request) {
+  try {
+    await requireUser();
+  } catch (error) {
+    return failFrom(error, "Sign in to add a document.");
+  }
+
   if (!process.env.GEMINI_API_KEY) {
     return fail(
-      "No GEMINI_API_KEY is set. This file was not sent to a model. Load the fictional records to use demo extraction.",
+      "No GEMINI_API_KEY is set. This file was not sent. Use the saved extraction for the fictional demo.",
       400,
     );
   }
@@ -47,13 +54,15 @@ export async function POST(request: Request) {
 
   try {
     const bytes = Buffer.from(await file.arrayBuffer());
+    const owner = await requireUser();
+    const previewSession = await withSession(async (session) => session, false);
     const extracted = await extractWithGemini({
       filename: file.name,
       mimeType: file.type,
       base64: bytes.toString("base64"),
-      patientId: "patient-sana-ahmed",
+      patientId: previewSession.patient.id,
     });
-    await saveUpload(extracted.document.id, bytes, file.type);
+    await saveUpload(owner.id, extracted.document.id, bytes, file.type);
     const passport = await withSession(async (session) => {
       session.loaded = true;
       session.documents.push(extracted.document);
@@ -68,10 +77,6 @@ export async function POST(request: Request) {
     });
     return ok({ passport, sent: true });
   } catch (error) {
-    return fail(
-      error instanceof Error
-        ? error.message
-        : "Extraction failed. Nothing new was confirmed.",
-    );
+    return failFrom(error, "Extraction failed. Nothing new was confirmed.");
   }
 }

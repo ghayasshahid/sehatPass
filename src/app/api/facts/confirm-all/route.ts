@@ -1,4 +1,4 @@
-import { fail, ok } from "@/lib/http";
+import { failFrom, ok } from "@/lib/http";
 import { present } from "@/lib/present";
 import { withSession } from "@/lib/store";
 import { validationIssues } from "@/lib/validate";
@@ -26,6 +26,6 @@ export async function POST() {
     });
     return ok({ passport });
   } catch (error) {
-    return fail(error instanceof Error ? error.message : "Could not confirm facts.");
+    return failFrom(error, "Could not confirm facts.");
   }
 }

@@ -3,7 +3,7 @@ import { randomBytes } from "crypto";
 import { compareHbA1c } from "@/lib/changes";
 import { deriveDiscrepancies } from "@/lib/discrepancies";
 import { invitationUrl, requestOrigin, safeOrigin } from "@/lib/format";
-import { fail, ok } from "@/lib/http";
+import { failFrom, ok } from "@/lib/http";
 import { present } from "@/lib/present";
 import { buildSummary } from "@/lib/summary";
 import { applyConfirmedMeta, withSession } from "@/lib/store";
@@ -46,6 +46,6 @@ export async function POST(request: Request) {
     });
     return ok(result);
   } catch (error) {
-    return fail(error instanceof Error ? error.message : "Could not create an invitation.");
+    return failFrom(error, "Could not create an invitation.");
   }
 }

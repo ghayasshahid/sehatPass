@@ -15,9 +15,9 @@ export const PATIENT: Patient = {
 
 export const CACHED_EXTRACTION: ExtractionMeta = {
   method: "cached_demo",
-  label: "Demo extraction",
+  label: "Saved extraction",
   disclosure:
-    "Demo extraction. No document was sent to an AI provider. These fields are a cached extraction shipped with the fictional documents. A valid structure is not proof the facts are correct. Confirm or correct each field before it is treated as confirmed.",
+    "Saved extraction. No GEMINI_API_KEY is required for these fictional documents, and no document was sent to an AI provider. These fields are the saved extraction shipped with the demo. A valid structure is not proof the facts are correct. Confirm or correct each field before it is treated as confirmed.",
 };
 
 const patientId = PATIENT.id;

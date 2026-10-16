@@ -22,6 +22,12 @@ export type FactKind =
 
 export type Analyte = "hba1c" | "fasting_glucose";
 
+export interface Account {
+  id: string;
+  email: string;
+  displayName: string;
+}
+
 export interface Patient {
   id: string;
   displayName: string;
@@ -118,6 +124,8 @@ export interface Invitation {
 
 export interface Session {
   version: 1;
+  ownerId: string;
+  ownerDisplayName: string;
   patient: Patient;
   loaded: boolean;
   extraction: ExtractionMeta | null;

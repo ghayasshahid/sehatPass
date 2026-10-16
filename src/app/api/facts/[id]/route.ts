@@ -1,4 +1,4 @@
-import { fail, ok } from "@/lib/http";
+import { fail, failFrom, ok } from "@/lib/http";
 import { present } from "@/lib/present";
 import { withSession } from "@/lib/store";
 import { applyPatch, validationIssues, type FactPatch } from "@/lib/validate";
@@ -51,6 +51,6 @@ export async function PATCH(
     });
     return ok({ passport });
   } catch (error) {
-    return fail(error instanceof Error ? error.message : "Could not update that fact.");
+    return failFrom(error, "Could not update that fact.");
   }
 }

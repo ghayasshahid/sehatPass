@@ -85,7 +85,7 @@ export function FactList({
                 </p>
               </div>
               <p className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
-                {document.extractionMethod === "cached_demo" ? "Demo extraction" : "Gemini extraction"}
+                {document.extractionMethod === "cached_demo" ? "Saved extraction" : "Gemini extraction"}
               </p>
             </div>
             <Button asChild variant="outline" className={`mt-4 ${tap}`}>

@@ -9,15 +9,17 @@ import {
   useState,
 } from "react";
 
-import type { Explanation, InvitationView, PassportView } from "@/lib/types";
+import type { Account, Explanation, InvitationView, PassportView } from "@/lib/types";
 import type { FactPatch } from "@/lib/validate";
 
 interface PassportContextValue {
+  user: Account | null;
   passport: PassportView | null;
   loading: boolean;
   busy: boolean;
   error: string | null;
   reload: () => Promise<void>;
+  logout: () => Promise<void>;
   loadFictional: () => Promise<void>;
   reset: () => Promise<void>;
   confirmFact: (id: string) => Promise<void>;
@@ -44,6 +46,7 @@ async function readJson(response: Response) {
 }
 
 export function PassportProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<Account | null>(null);
   const [passport, setPassport] = useState<PassportView | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -51,21 +54,41 @@ export function PassportProvider({ children }: { children: React.ReactNode }) {
 
   const reload = useCallback(async () => {
     const response = await fetch("/api/passport", { cache: "no-store" });
+    if (response.status === 401) {
+      setUser(null);
+      setPassport(null);
+      return;
+    }
     const body = await readJson(response);
     if (body.passport) setPassport(body.passport);
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    reload()
-      .catch((reason: unknown) => {
+    (async () => {
+      try {
+        const me = await fetch("/api/auth/me", { cache: "no-store" });
+        if (cancelled) return;
+        if (!me.ok) {
+          setUser(null);
+          setPassport(null);
+          return;
+        }
+        const body = (await me.json()) as { user?: Account };
+        if (!body.user) {
+          setUser(null);
+          return;
+        }
+        setUser(body.user);
+        await reload();
+      } catch (reason: unknown) {
         if (!cancelled) {
           setError(reason instanceof Error ? reason.message : "The passport could not be loaded.");
         }
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    })();
     return () => {
       cancelled = true;
     };
@@ -97,11 +120,17 @@ export function PassportProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<PassportContextValue>(
     () => ({
+      user,
       passport,
       loading,
       busy,
       error,
       reload: () => run(reload),
+      logout: () =>
+        run(async () => {
+          await fetch("/api/auth/logout", { method: "POST" });
+          window.location.assign("/login");
+        }),
       loadFictional: () =>
         run(async () => {
           await mutate("/api/passport", {
@@ -163,7 +192,7 @@ export function PassportProvider({ children }: { children: React.ReactNode }) {
           return body.invitation;
         }),
     }),
-    [busy, error, loading, mutate, passport, reload, run],
+    [busy, error, loading, mutate, passport, reload, run, user],
   );
 
   return <PassportContext.Provider value={value}>{children}</PassportContext.Provider>;

@@ -2,7 +2,10 @@ import { formatDate, formatHbA1c, formatUrduDate } from "@/lib/format";
 import type { ChangePoint, Explanation } from "@/lib/types";
 
 const TEMPLATE_DISCLOSURE =
-  "No GROQ_API_KEY is set. This explanation is a grounded template filled only with confirmed HbA1c values and dates. A language model was not called, and the numerical change was calculated in code.";
+  "No GROQ_API_KEY is set. This explanation is a grounded template filled only with confirmed HbA1c values and dates. A language model was not called, and the numerical change was calculated in code. It does not name a future disease. Discuss the change with a doctor.";
+
+const FUTURE_DISEASE =
+  /susceptible|will develop|future disease|\bat risk\b|prognosis|\bpredict(?:ed|s|ing)?\b|complication|other patients|risk score|خطرے میں|مستقبل کی بیماری|بیماری ہو گی|دوسرے مریض/i;
 
 function englishList(points: ChangePoint[]): string {
   const parts = points.map(
@@ -67,6 +70,7 @@ export function explanationIsGrounded(
   urdu: string,
   points: ChangePoint[],
 ): boolean {
+  if (FUTURE_DISEASE.test(english) || FUTURE_DISEASE.test(urdu)) return false;
   if (!english.includes("doctor")) return false;
   if (!urdu.includes("ڈاکٹر")) return false;
   if (!/not a diagnosis/i.test(english)) return false;

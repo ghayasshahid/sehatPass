@@ -35,7 +35,7 @@ export async function draftExplanation(points: ChangePoint[]): Promise<{
         {
           role: "system",
           content:
-            "Draft a plain-language explanation for a patient. Use only the confirmed HbA1c numbers and dates in the user message. Do not add other numbers, medicines, or doses. Do not diagnose or recommend treatment. Say this is not a diagnosis, and that the person may want to discuss the change with their doctor. Write english and urdu. Urdu must use Urdu script. Return JSON {\"english\":\"...\",\"urdu\":\"...\"}.",
+            "Draft a plain-language explanation for a patient. Use only the confirmed HbA1c numbers and dates in the user message. Do not add other numbers, medicines, or doses. Do not diagnose or recommend treatment. Do not name a future disease, predict an illness, give a risk score, or say the person is susceptible to a disease. Do not compare this person with other patients. Say this is not a diagnosis, and tell them to discuss the change with their doctor. Write english and urdu. Urdu must use Urdu script. Return JSON {\"english\":\"...\",\"urdu\":\"...\"}.",
         },
         {
           role: "user",

@@ -2,10 +2,18 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { compareHbA1c } from "@/lib/changes";
-import { createFictionalRecords } from "@/lib/demo-case";
+import { createFictionalRecords, PATIENT } from "@/lib/demo-case";
 import { deriveDiscrepancies } from "@/lib/discrepancies";
 import { explainFromConfirmed, explanationIsGrounded } from "@/lib/explain";
 import { invitationUrl } from "@/lib/format";
+import { hashPassword, verifyPassword } from "@/lib/passwords";
+import {
+  findInvitation,
+  insertUser,
+  loadPassport,
+  openDatabase,
+  savePassport,
+} from "@/lib/records-db";
 import { buildSummary } from "@/lib/summary";
 import type { Fact } from "@/lib/types";
 
@@ -131,6 +139,11 @@ describe("explanation and invitation", () => {
       explanationIsGrounded(explanation.english, explanation.urdu, change.points),
       true,
     );
+    const namesAFutureDisease = `${explanation.english} You are susceptible to a future disease.`;
+    assert.equal(
+      explanationIsGrounded(namesAFutureDisease, explanation.urdu, change.points),
+      false,
+    );
   });
 
   it("puts only an invitation in the doctor link", () => {
@@ -138,5 +151,118 @@ describe("explanation and invitation", () => {
     const url = invitationUrl("http://127.0.0.1:4721", token);
     assert.equal(url, "http://127.0.0.1:4721/doctor/abc123XYZ");
     assert.doesNotMatch(url, /7\.2|metformin|hba1c/i);
+  });
+});
+
+describe("accounts and saved records", () => {
+  it("stores a password hash instead of the password", async () => {
+    const password = "correct horse battery";
+    const hash = await hashPassword(password);
+    assert.equal(hash.includes(password), false);
+    assert.match(hash, /^scrypt\$/);
+    assert.equal(await verifyPassword(password, hash), true);
+    assert.equal(await verifyPassword("wrong-password", hash), false);
+  });
+
+  it("keeps one patient's confirmed facts and invitation away from another patient", () => {
+    const database = openDatabase(":memory:");
+    const createdAt = "2026-10-17T00:00:00.000Z";
+    insertUser(database, {
+      id: "user-a",
+      email: "a@example.com",
+      displayName: "A",
+      passwordHash: "hash-a",
+      createdAt,
+    });
+    insertUser(database, {
+      id: "user-b",
+      email: "b@example.com",
+      displayName: "B",
+      passwordHash: "hash-b",
+      createdAt,
+    });
+
+    const { documents, facts } = createFictionalRecords();
+    const confirmed = confirmedFacts(facts);
+    const change = compareHbA1c(confirmed, documents);
+    const snapshot = buildSummary(
+      {
+        patient: PATIENT,
+        documents,
+        facts: confirmed,
+        discrepancies: deriveDiscrepancies(confirmed, documents),
+      },
+      change,
+      createdAt,
+    );
+    const token = "inviteToken1";
+    savePassport(database, "user-a", {
+      patient: PATIENT,
+      loaded: true,
+      extraction: null,
+      documents,
+      facts: confirmed,
+      invitations: [
+        {
+          token,
+          url: invitationUrl("http://127.0.0.1:4721", token),
+          createdAt,
+          expiresAt: "2026-10-17T02:00:00.000Z",
+          snapshot,
+        },
+      ],
+      updatedAt: createdAt,
+    });
+
+    const other = confirmed.find((fact) => fact.id === "fact-lcl-hba1c");
+    assert.ok(other);
+    savePassport(database, "user-b", {
+      patient: {
+        id: "patient-user-b",
+        displayName: "B",
+        fictional: true,
+        city: "",
+        focus: "Your records",
+      },
+      loaded: true,
+      extraction: null,
+      documents: [],
+      facts: [{ ...other, value: 4.4, patientId: "patient-user-b" }],
+      invitations: [],
+      updatedAt: createdAt,
+    });
+
+    const savedA = loadPassport(database, "user-a");
+    const savedB = loadPassport(database, "user-b");
+    assert.ok(savedA);
+    assert.ok(savedB);
+    assert.deepEqual(
+      savedA.facts
+        .filter((fact) => fact.analyte === "hba1c")
+        .map((fact) => fact.value ?? 0)
+        .sort((left, right) => left - right),
+      [7.2, 8.1, 9.0],
+    );
+    assert.deepEqual(
+      savedA.facts
+        .filter((fact) => fact.kind === "medication")
+        .map((fact) => fact.doseText)
+        .sort(),
+      ["1000 mg", "500 mg"],
+    );
+    assert.equal(
+      savedA.facts.some((fact) => fact.patientMarkedCurrent === true),
+      false,
+    );
+    assert.equal(savedA.facts.find((fact) => fact.id === "fact-lcl-hba1c")?.value, 7.2);
+    assert.equal(savedB.facts.length, 1);
+    assert.equal(savedB.facts[0]?.value, 4.4);
+    assert.equal(savedB.invitations.length, 0);
+    assert.equal(savedA.invitations[0]?.url, "http://127.0.0.1:4721/doctor/inviteToken1");
+    assert.doesNotMatch(savedA.invitations[0]?.url ?? "", /7\.2|metformin|hba1c/i);
+    const invitation = findInvitation(database, token);
+    assert.equal(invitation?.snapshot.patientName, "Sana Ahmed");
+    assert.equal(JSON.stringify(invitation).includes("user-b"), false);
+    database.close();
   });
 });

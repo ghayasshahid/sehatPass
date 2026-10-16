@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import { usePassport } from "@/components/passport-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -15,8 +16,16 @@ const tabs = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { error, reload } = usePassport();
+  const router = useRouter();
+  const { error, reload, user, loading, logout } = usePassport();
   const doctorView = pathname.startsWith("/doctor/");
+  const authPage = pathname === "/login" || pathname === "/signup";
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user && !doctorView && !authPage) router.replace("/login");
+    if (user && authPage) router.replace("/");
+  }, [authPage, doctorView, loading, router, user]);
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
@@ -37,9 +46,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span className="urdu-compact mt-1 block text-muted-foreground">صحت پاس</span>
             </span>
           </Link>
-          <p className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold tracking-wide text-amber-950 uppercase">
-            {doctorView ? "Doctor view · fictional" : "Fictional demo"}
-          </p>
+          <div className="flex items-center gap-2">
+            {user && !doctorView && !authPage ? (
+              <button
+                type="button"
+                className="min-h-12 rounded-lg px-2 text-sm font-semibold text-primary"
+                onClick={() => void logout()}
+              >
+                Log out
+              </button>
+            ) : null}
+            <p className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold tracking-wide text-amber-950 uppercase">
+              {doctorView ? "Doctor view · fictional" : "Fictional demo"}
+            </p>
+          </div>
         </div>
         {doctorView ? (
           <div className="mx-auto flex max-w-3xl px-4 pb-3">
@@ -47,7 +67,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               Back to the patient DoctorPass
             </Link>
           </div>
-        ) : (
+        ) : null}
+        {!doctorView && !authPage ? (
           <nav className="mx-auto grid max-w-3xl grid-cols-2 gap-2 px-4 pb-3 sm:grid-cols-4">
             {tabs.map((tab) => {
               const active = tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
@@ -66,7 +87,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
-        )}
+        ) : null}
         <div className="border-t border-amber-200 bg-amber-50 px-4 py-2 text-center">
           <p className="text-sm font-medium text-amber-950">
             SehatPass organizes records. It does not diagnose or recommend treatment.
@@ -77,7 +98,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main id="main" className="mx-auto w-full max-w-3xl px-4 py-6 pb-10">
-        {error ? (
+        {error && !authPage ? (
           <Alert className="mb-4 border-destructive/30 bg-card" data-testid="passport-error">
             <AlertTitle>Something needs another try</AlertTitle>
             <AlertDescription>
@@ -92,7 +113,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </AlertDescription>
           </Alert>
         ) : null}
-        {children}
+        {doctorView || authPage || (!loading && user) ? (
+          children
+        ) : (
+          <p className="text-lg">{loading ? "Loading your passport…" : "Sign in to see your records."}</p>
+        )}
       </main>
     </div>
   );

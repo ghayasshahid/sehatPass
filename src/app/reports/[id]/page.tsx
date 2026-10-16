@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { FictionalReport, isBundledReport } from "@/components/fictional-report";
 import { Button } from "@/components/ui/button";
+import { getCurrentUser } from "@/lib/auth";
 import { readUpload } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +40,19 @@ export default async function ReportPage({
     );
   }
 
-  const upload = id.startsWith("upload-") ? await readUpload(id) : null;
+  const user = id.startsWith("upload-") ? await getCurrentUser() : null;
+  if (id.startsWith("upload-") && !user) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <h1 className="font-heading text-3xl font-semibold">Sign in to open your file</h1>
+        <p className="mt-2 leading-7">Uploaded reports stay with the patient who added them.</p>
+        <Button asChild className="mt-4 min-h-12 px-4 text-base">
+          <Link href="/login">Log in</Link>
+        </Button>
+      </div>
+    );
+  }
+  const upload = user ? await readUpload(user.id, id) : null;
   if (!upload) {
     return (
       <div className="rounded-2xl border border-border bg-card p-5">

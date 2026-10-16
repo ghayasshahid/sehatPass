@@ -1,5 +1,5 @@
 import { fail, ok } from "@/lib/http";
-import { withSession } from "@/lib/store";
+import { appDatabase, findInvitation } from "@/lib/records-db";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -9,9 +9,7 @@ export async function GET(
   context: { params: Promise<{ token: string }> },
 ) {
   const { token } = await context.params;
-  const invitation = await withSession(async (session) => {
-    return session.invitations.find((item) => item.token === token) ?? null;
-  }, false);
+  const invitation = findInvitation(appDatabase(), token);
 
   if (!invitation) {
     return fail("This invitation was not found. No record is shown.", 404);

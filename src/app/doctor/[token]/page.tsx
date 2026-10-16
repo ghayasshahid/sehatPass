@@ -61,7 +61,9 @@ export default function DoctorViewPage({ params }: { params: Promise<{ token: st
         <p className="text-sm font-semibold tracking-wide text-primary uppercase">Invited clinician</p>
         <h1 className="mt-1 font-heading text-4xl font-semibold">Approved summary</h1>
         <p className="mt-3 leading-7">
-          Sana Ahmed is a fictional demo patient. You are seeing only what she approved.
+          {summary.patientName === "Sana Ahmed"
+            ? "Sana Ahmed is a fictional demo patient. You are seeing only what she approved."
+            : `You are seeing only the summary ${summary.patientName} approved.`}
           {expiresAt
             ? ` This invitation expires ${new Date(expiresAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.`
             : ""}
