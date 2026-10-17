@@ -56,14 +56,14 @@ export function ChapterHeader({
   return (
     <header className="chapter-open">
       {index && spine ? (
-        <p className="text-sm font-bold tracking-wide text-primary lg:hidden">
+        <p className="text-sm font-medium text-muted-foreground lg:hidden">
           {index} of 4 · {spine}
         </p>
       ) : null}
-      <h1 className="font-heading text-[2.65rem] leading-[1.02] font-semibold tracking-tight text-balance sm:text-5xl">
+      <h1 className="mt-1 text-3xl leading-tight font-semibold tracking-tight text-balance">
         {title}
       </h1>
-      <p className="chapter-meaning mt-4 max-w-xl text-lg leading-8">{meaning}</p>
+      <p className="mt-2 max-w-2xl text-base leading-7 text-foreground">{meaning}</p>
     </header>
   );
 }

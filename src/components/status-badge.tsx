@@ -4,7 +4,7 @@ import type { ConfirmationStatus } from "@/lib/types";
 const styles: Record<ConfirmationStatus, string> = {
   proposed: "border-border bg-muted text-foreground",
   confirmed: "border-primary/30 bg-secondary text-secondary-foreground",
-  unresolved: "border-amber-300 bg-amber-100 text-amber-950",
+  unresolved: "border-destructive/40 bg-card text-destructive",
 };
 
 const labels: Record<ConfirmationStatus, string> = {

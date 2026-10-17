@@ -1,22 +1,15 @@
 import type { Metadata } from "next";
-import { Atkinson_Hyperlegible, Fraunces, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
+import { IBM_Plex_Sans, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
 
 import { AppShell } from "@/components/app-shell";
 import { PassportProvider } from "@/components/passport-provider";
 
 import "./globals.css";
 
-const sans = Atkinson_Hyperlegible({
+const sans = IBM_Plex_Sans({
   subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-atkinson",
-  display: "swap",
-});
-
-const serif = Fraunces({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-fraunces",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-plex",
   display: "swap",
 });
 
@@ -47,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${sans.variable} ${serif.variable} ${urdu.variable} ${naskh.variable} antialiased`}>
+      <body className={`${sans.variable} ${urdu.variable} ${naskh.variable} antialiased`}>
         <PassportProvider>
           <AppShell>{children}</AppShell>
         </PassportProvider>
