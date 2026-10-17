@@ -1,21 +1,18 @@
 import { formatDate, formatHbA1c, round1 } from "@/lib/format";
 import type { ChangePoint, ChangeResult, DocumentRecord, Fact } from "@/lib/types";
 
-function documentDate(documents: DocumentRecord[], documentId: string): string {
-  return documents.find((document) => document.id === documentId)?.documentDate ?? "";
-}
-
-function facilityName(documents: DocumentRecord[], documentId: string): string {
-  return (
-    documents.find((document) => document.id === documentId)?.facilityName ??
-    "Unknown facility"
-  );
+function documentsById(documents: DocumentRecord[]) {
+  return new Map(documents.map((document) => [document.id, document]));
 }
 
 export function compareHbA1c(
   facts: Fact[],
   documents: DocumentRecord[],
 ): ChangeResult {
+  const byDocument = documentsById(documents);
+  const documentDate = (documentId: string) => byDocument.get(documentId)?.documentDate ?? "";
+  const facilityName = (documentId: string) =>
+    byDocument.get(documentId)?.facilityName ?? "Unknown facility";
   const hba1c = facts.filter((fact) => fact.analyte === "hba1c");
   const withheldProposedCount = hba1c.filter(
     (fact) => fact.status === "proposed",
@@ -28,15 +25,13 @@ export function compareHbA1c(
       return true;
     }
     excludedNotes.push(
-      `${fact.label} from ${facilityName(documents, fact.documentId)} was not compared because the unit is not %.`,
+      `${fact.label} from ${facilityName(fact.documentId)} was not compared because the unit is not %.`,
     );
     return false;
   });
 
   const sorted = [...compatible].sort((a, b) => {
-    const byDate = documentDate(documents, a.documentId).localeCompare(
-      documentDate(documents, b.documentId),
-    );
+    const byDate = documentDate(a.documentId).localeCompare(documentDate(b.documentId));
     if (byDate !== 0) return byDate;
     return a.id.localeCompare(b.id);
   });
@@ -44,7 +39,7 @@ export function compareHbA1c(
   const points: ChangePoint[] = [];
   const seenDates = new Map<string, number>();
   for (const fact of sorted) {
-    const date = documentDate(documents, fact.documentId);
+    const date = documentDate(fact.documentId);
     const value = round1(fact.value as number);
     const previous = seenDates.get(date);
     if (previous === undefined) {
@@ -55,7 +50,7 @@ export function compareHbA1c(
         date,
         value,
         unit: "%",
-        facilityName: facilityName(documents, fact.documentId),
+        facilityName: facilityName(fact.documentId),
         sourceRef: fact.sourceRef,
         status: "confirmed",
       });
