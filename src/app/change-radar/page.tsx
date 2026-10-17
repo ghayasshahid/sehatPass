@@ -101,13 +101,13 @@ export default function ChangeRadarPage() {
               passport.discrepancies.map((item) => (
                 <article
                   key={item.id}
-                  className="rounded-2xl border border-amber-300 bg-amber-50 p-4"
+                  className="rounded-md border border-border border-l-2 border-l-destructive bg-card p-4"
                   data-testid={item.kind === "conflicting_doses" ? "metformin-conflict" : "follow-up-question"}
                 >
                   <StatusBadge status="unresolved" />
-                  <h3 className="mt-2 font-heading text-xl font-semibold text-amber-950">{item.title}</h3>
-                  <p className="mt-2 leading-7 text-amber-950">{item.detail}</p>
-                  <p className="mt-2 font-semibold text-amber-950">{item.question}</p>
+                  <h3 className="mt-2 text-xl font-semibold">{item.title}</h3>
+                  <p className="mt-2 leading-7">{item.detail}</p>
+                  <p className="mt-2 font-semibold">{item.question}</p>
                 </article>
               ))
             )}

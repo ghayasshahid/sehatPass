@@ -24,35 +24,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [authPage, doctorView, loading, router, user]);
 
   return (
-    <div className="book-paper min-h-dvh text-foreground">
+    <div className="min-h-dvh bg-muted text-foreground">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2"
       >
         Skip to content
       </a>
-      <div className="relative z-[1] mx-auto grid min-h-dvh w-full max-w-6xl lg:grid-cols-[17.5rem_1fr]">
-        <aside className="book-spine relative hidden min-h-dvh flex-col px-7 py-8 lg:flex">
-          <span className="book-fold" aria-hidden="true" />
-          <Link href={doctorView ? "/doctor-pass" : "/"} className="block">
-            <span className="block font-heading text-3xl leading-none font-semibold tracking-tight">
-              SehatPass
-            </span>
-            <span className="urdu-compact mt-2 block text-muted-foreground" lang="ur" dir="rtl">
+      <div className="mx-auto grid min-h-dvh w-full max-w-6xl bg-card lg:grid-cols-[16.5rem_1fr] lg:border-x lg:border-border">
+        <aside className="hidden min-h-dvh flex-col border-r border-border bg-muted px-5 py-6 lg:flex">
+          <Link href={doctorView ? "/doctor-pass" : "/"} className="block border-b border-border pb-4">
+            <span className="block text-xl leading-none font-semibold tracking-tight">SehatPass</span>
+            <span className="urdu-compact mt-1 block text-muted-foreground" lang="ur" dir="rtl">
               صحت پاس
             </span>
           </Link>
 
           {showChapters ? (
             <>
-              <p className="mt-10 text-sm font-bold tracking-wide text-primary uppercase">Signed in</p>
-              <p className="mt-1 font-heading text-2xl leading-tight font-semibold">
-                {user?.displayName ?? "Patient"}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Fictional demo. These records are not a real chart.
-              </p>
-              <nav className="mt-10 grid gap-6" aria-label="Passport chapters">
+              <p className="mt-5 text-xs font-medium tracking-wide text-muted-foreground uppercase">Signed in</p>
+              <p className="mt-1 text-base leading-tight font-semibold">{user?.displayName ?? "Patient"}</p>
+              <p className="mt-1 text-sm leading-5 text-muted-foreground">Fictional records, not a real chart.</p>
+              <nav className="mt-6 grid" aria-label="Passport chapters">
                 {chapters.map((item) => {
                   const active = chapter?.href === item.href;
                   return (
@@ -60,32 +53,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       key={item.href}
                       href={item.href}
                       aria-current={active ? "page" : undefined}
-                      className="group grid grid-cols-[1.75rem_1fr] gap-x-2"
+                      className={`border-l-2 px-3 py-2.5 ${
+                        active ? "border-primary bg-card" : "border-transparent hover:bg-card/70"
+                      }`}
                     >
-                      <span
-                        className={`font-heading text-xl leading-none font-semibold ${
-                          active ? "text-primary" : "text-muted-foreground"
-                        }`}
-                      >
-                        {item.index}
+                      <span className={`block text-sm font-semibold ${active ? "text-foreground" : "text-muted-foreground"}`}>
+                        {item.index}. {item.title}
                       </span>
-                      <span>
-                        <span
-                          className={`block font-heading text-lg leading-tight font-semibold ${
-                            active ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
-                          }`}
-                        >
-                          {item.title}
-                        </span>
-                        <span className="mt-1 block text-sm leading-5 text-muted-foreground">{item.spine}</span>
-                      </span>
+                      <span className="mt-0.5 block text-sm leading-5 text-muted-foreground">{item.spine}</span>
                     </Link>
                   );
                 })}
               </nav>
             </>
           ) : (
-            <p className="mt-10 max-w-[14rem] font-heading text-2xl leading-snug font-semibold">
+            <p className="mt-6 text-base leading-6 font-medium">
               {doctorView
                 ? "This page shows only the summary the patient approved."
                 : "Your next doctor should know what your last doctor knew."}
@@ -120,16 +102,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         <div className="flex min-h-dvh flex-col">
-          <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 px-5 py-3 backdrop-blur lg:hidden">
+          <header className="sticky top-0 z-40 border-b border-border bg-card px-5 py-3 lg:hidden">
             <div className="flex items-start justify-between gap-3">
               <Link href={doctorView ? "/doctor-pass" : "/"}>
-                <span className="block font-heading text-2xl leading-none font-semibold">SehatPass</span>
+                <span className="block text-xl leading-none font-semibold">SehatPass</span>
                 <span className="urdu-compact text-muted-foreground" lang="ur" dir="rtl">
                   صحت پاس
                 </span>
               </Link>
               <div className="flex flex-col items-end gap-1">
-                <p className="text-xs font-bold tracking-wide text-amber-950 uppercase">Fictional demo</p>
+                <p className="text-xs font-medium text-muted-foreground">Fictional records</p>
                 {user && showChapters ? (
                   <button
                     type="button"
@@ -179,7 +161,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           {showChapters ? (
             <nav
-              className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-2 py-2 backdrop-blur lg:hidden"
+              className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-2 py-1 lg:hidden"
               aria-label="Passport chapters"
             >
               <ul className="mx-auto grid max-w-lg grid-cols-4 gap-1">
@@ -190,12 +172,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <Link
                         href={item.href}
                         aria-current={active ? "page" : undefined}
-                        className={`flex min-h-12 flex-col items-center justify-center rounded-md px-1 text-center text-[0.78rem] leading-tight font-bold ${
-                          active ? "text-primary" : "text-muted-foreground"
+                        className={`flex min-h-12 items-center justify-center border-t-2 px-1 text-center text-sm leading-tight font-medium ${
+                          active ? "border-primary text-foreground" : "border-transparent text-muted-foreground"
                         }`}
                       >
-                        <span className="font-heading text-base leading-none">{item.index}</span>
-                        <span className="mt-1">{item.nav}</span>
+                        <span>{item.nav}</span>
                       </Link>
                     </li>
                   );

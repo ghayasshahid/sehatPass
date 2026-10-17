@@ -85,8 +85,8 @@ export function SummaryView({
         <p className="mt-2 leading-7">{summary.recordedChange ?? summary.recordedChangeNote}</p>
       </section>
 
-      <section className="rounded-xl border border-amber-300 bg-amber-50 p-4" data-testid="unresolved-list">
-        <h2 className="font-heading text-xl font-semibold text-amber-950">Unresolved discrepancies</h2>
+      <section className="rounded-md border border-border border-l-2 border-l-destructive bg-card p-4" data-testid="unresolved-list">
+        <h2 className="text-xl font-semibold">Unresolved discrepancies</h2>
         {summary.unresolved.length === 0 ? (
           <p className="mt-2">None are recorded in this summary.</p>
         ) : (
@@ -94,7 +94,7 @@ export function SummaryView({
             {summary.unresolved.map((item) => (
               <li key={item.id}>
                 <StatusBadge status="unresolved" />
-                <p className="mt-2 leading-7 text-amber-950">{item.text}</p>
+                <p className="mt-2 leading-7">{item.text}</p>
                 <SourceLink documentId={item.documentId} label={item.sourceLabel} />
               </li>
             ))}

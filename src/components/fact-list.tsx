@@ -74,7 +74,7 @@ export function FactList({
       {documents.map((document) => {
         const rows = facts.filter((fact) => fact.documentId === document.id);
         return (
-          <article key={document.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <article key={document.id} className="rounded-md border border-border bg-card p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-primary">{formatDate(document.documentDate)}</p>

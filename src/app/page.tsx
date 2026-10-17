@@ -153,7 +153,7 @@ export default function VerifyPage() {
               </Button>
             </div>
           ) : (
-            <p className="rounded-xl bg-teal-50 px-4 py-3 font-medium text-teal-950">
+            <p className="rounded-md border border-border bg-muted px-4 py-3 font-medium">
               Every proposed field in this session is confirmed. You can still correct a line.
             </p>
           )}
