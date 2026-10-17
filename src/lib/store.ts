@@ -125,8 +125,10 @@ export async function saveUpload(userId: string, id: string, bytes: Buffer, mime
   if (!safeSegment(userId) || !safeSegment(id)) throw new Error("Invalid upload id");
   const dir = path.join(uploadDir, userId);
   await mkdir(dir, { recursive: true });
-  await writeFile(path.join(dir, id), bytes);
-  await writeFile(path.join(dir, `${id}.mime`), mime);
+  await Promise.all([
+    writeFile(path.join(dir, id), bytes),
+    writeFile(path.join(dir, `${id}.mime`), mime),
+  ]);
 }
 
 export async function readUpload(
