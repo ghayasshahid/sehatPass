@@ -8,7 +8,6 @@ import { Hba1cChart } from "@/components/hba1c-chart";
 import { StatusBadge } from "@/components/status-badge";
 import { usePassport } from "@/components/passport-provider";
 import { Button } from "@/components/ui/button";
-import { formatDate } from "@/lib/format";
 import type { Explanation } from "@/lib/types";
 
 export default function ChangeRadarPage() {
@@ -65,24 +64,6 @@ export default function ChangeRadarPage() {
         </div>
       ) : (
         <div className="chapter-body grid gap-8">
-          <section className="figure-board" aria-label="HbA1c written on the papers">
-            {(passport.change.ready
-              ? passport.change.points.map((point) => ({
-                  value: `${point.value}%`,
-                  caption: `${formatDate(point.date)} · ${point.facilityName}`,
-                }))
-              : [
-                  { value: "7.2%", caption: "18 Jan 2026 · Lahore City Lab" },
-                  { value: "8.1%", caption: "14 Apr 2026 · Medicare Diagnostics" },
-                  { value: "9.0%", caption: "22 Jul 2026 · Shifa Community Clinic" },
-                ]
-            ).map((figure) => (
-              <article key={figure.caption}>
-                <strong>{figure.value}</strong>
-                <span className="text-base leading-6">{figure.caption}</span>
-              </article>
-            ))}
-          </section>
           <section className="grid gap-3" data-testid="change-statement">
             {passport.change.ready && passport.change.statement ? (
               <>

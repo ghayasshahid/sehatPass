@@ -30,10 +30,11 @@ export function SummaryView({
 }) {
   return (
     <div className="grid gap-4">
-      <section className="bg-muted p-6">
-        <h2 className="font-heading text-3xl font-medium">{summary.patientName}</h2>
+      <section className="rounded-xl border border-border bg-card p-4">
+        <p className="text-sm font-semibold tracking-wide text-primary uppercase">Fictional demo</p>
+        <h2 className="font-heading text-2xl font-semibold">{summary.patientName}</h2>
         <p className="text-muted-foreground">
-          Fictional demo. Not a real patient. {summary.city}. {summary.focus}
+          Not a real patient · {summary.city} · {summary.focus}
         </p>
         {audience === "doctor" && summary.approvedAt ? (
           <p className="mt-2 text-sm">
@@ -44,7 +45,7 @@ export function SummaryView({
         )}
       </section>
 
-      <section className="bg-muted p-6" data-testid="current-medications">
+      <section className="rounded-xl border border-border bg-card p-4" data-testid="current-medications">
         <h2 className="font-heading text-xl font-semibold">Current medications</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">{summary.currentMedicationsNote}</p>
         {summary.currentMedications.length ? (
@@ -60,12 +61,12 @@ export function SummaryView({
         ) : null}
       </section>
 
-      <section className="bg-muted p-6">
+      <section className="rounded-xl border border-border bg-card p-4">
         <h2 className="font-heading text-xl font-semibold">Allergies</h2>
         <p className="mt-1">{summary.allergiesNote}</p>
       </section>
 
-      <section className="bg-muted p-6">
+      <section className="rounded-xl border border-border bg-card p-4">
         <h2 className="font-heading text-xl font-semibold">Recent labs</h2>
         {summary.recentLabsNote ? <p className="mt-1">{summary.recentLabsNote}</p> : null}
         <ul className="mt-3 grid gap-3">
@@ -79,7 +80,7 @@ export function SummaryView({
         </ul>
       </section>
 
-      <section className="bg-muted p-6" data-testid="recorded-change">
+      <section className="rounded-xl border border-border bg-card p-4" data-testid="recorded-change">
         <h2 className="font-heading text-xl font-semibold">Recorded change</h2>
         <p className="mt-2 leading-7">{summary.recordedChange ?? summary.recordedChangeNote}</p>
       </section>
@@ -101,7 +102,7 @@ export function SummaryView({
         )}
       </section>
 
-      <section className="bg-muted p-6">
+      <section className="rounded-xl border border-border bg-card p-4">
         <h2 className="font-heading text-xl font-semibold">Questions for the visit</h2>
         <ul className="mt-3 grid list-disc gap-2 pl-5">
           {summary.questions.map((question) => (

@@ -27,8 +27,8 @@ export default function DoctorPassPage() {
       <ChapterHeader {...chapters[3]} />
 
       {!passport.loaded ? (
-        <div className="chapter-body bg-card p-6">
-          <h2 className="font-heading text-3xl font-medium">Nothing to share yet</h2>
+        <div className="chapter-body rounded-2xl border border-dashed border-border bg-card p-5">
+          <h2 className="font-heading text-2xl font-semibold">Nothing to share yet</h2>
           <p className="mt-2 leading-7">Load and confirm the fictional records before approving a visit summary.</p>
           <Button asChild className={`mt-4 ${tap}`}>
             <Link href="/">Go to upload and verify</Link>
@@ -36,57 +36,51 @@ export default function DoctorPassPage() {
         </div>
       ) : (
         <div className="chapter-body grid gap-6">
-          <section className="bg-card p-6" data-ui>
-            <h2 className="font-heading text-3xl font-medium">Mark the dose you take</h2>
-            <p className="mt-3 max-w-xl leading-7">
-              Both lines can stay blank. SehatPass will not pick a metformin dose.
+          <section className="rounded-2xl border border-border bg-card p-4">
+            <h2 className="font-heading text-2xl font-semibold">Mark current treatment yourself</h2>
+            <p className="mt-2 leading-7 text-muted-foreground">
+              Both prescriptions can stay unmarked. SehatPass will not pick a metformin dose.
             </p>
-            <table className="mt-8 w-full text-left">
-              <tbody>
-                {medications.map((fact, index) => {
-                  const document = passport.documents.find((item) => item.id === fact.documentId);
-                  return (
-                    <tr key={fact.id} className={index % 2 === 0 ? "bg-background" : "bg-muted"}>
-                      <td className="px-4 py-5 align-top">
-                        <StatusBadge status={fact.status} />
-                        <p className="mt-2 text-lg font-medium">
-                          {fact.medicationName} {fact.doseText}, {fact.frequencyText}
-                        </p>
-                        <p className="text-base text-muted-foreground">
-                          {document ? `${document.facilityName} · ${formatDate(document.documentDate)}` : fact.sourceRef}
-                        </p>
-                      </td>
-                      <td className="px-4 py-5 align-top">
-                        <div className="flex flex-wrap gap-2">
-                          <Button
-                            className={tap}
-                            variant={fact.patientMarkedCurrent ? "default" : "outline"}
-                            disabled={busy}
-                            onClick={() => void markCurrent(fact.id, true)}
-                          >
-                            I take this now
-                          </Button>
-                          <Button
-                            className={tap}
-                            variant={fact.patientMarkedCurrent === false ? "default" : "outline"}
-                            disabled={busy}
-                            onClick={() => void markCurrent(fact.id, false)}
-                          >
-                            Not current
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <ul className="mt-3 grid gap-3">
+              {medications.map((fact) => {
+                const document = passport.documents.find((item) => item.id === fact.documentId);
+                return (
+                  <li key={fact.id} className="rounded-xl border border-border p-3">
+                    <StatusBadge status={fact.status} />
+                    <p className="mt-2 font-semibold">
+                      {fact.medicationName} {fact.doseText}, {fact.frequencyText}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {document ? `${document.facilityName} · ${formatDate(document.documentDate)}` : fact.sourceRef}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button
+                        className={tap}
+                        variant={fact.patientMarkedCurrent ? "default" : "outline"}
+                        disabled={busy}
+                        onClick={() => void markCurrent(fact.id, true)}
+                      >
+                        I take this now
+                      </Button>
+                      <Button
+                        className={tap}
+                        variant={fact.patientMarkedCurrent === false ? "default" : "outline"}
+                        disabled={busy}
+                        onClick={() => void markCurrent(fact.id, false)}
+                      >
+                        Not current
+                      </Button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           </section>
 
           <SummaryView summary={passport.summary} audience="patient" />
 
-          <section className="bg-primary p-6 text-primary-foreground">
-            <h2 className="font-heading text-3xl font-medium">Approve the summary</h2>
+          <section className="rounded-2xl border border-primary/30 bg-card p-4">
+            <h2 className="font-heading text-2xl font-semibold">Approve the summary</h2>
             <label className="mt-3 flex items-start gap-3 text-base leading-7">
               <input
                 type="checkbox"
@@ -101,19 +95,18 @@ export default function DoctorPassPage() {
             </label>
             <Button
               className={`mt-4 w-full ${tap}`}
-              variant="secondary"
               disabled={!accepted || busy || passport.summary.recentLabs.length + passport.facts.filter((fact) => fact.status === "confirmed").length === 0}
               data-testid="approve-doctor-pass"
               onClick={() => void approve()}
             >
               Approve and create invitation
             </Button>
-            <p className="mt-3 text-base">The invitation expires after two hours.</p>
+            <p className="mt-2 text-sm text-muted-foreground">The invitation expires after two hours.</p>
           </section>
 
           {latest ? (
-            <section className="bg-muted p-6" data-testid="invitation">
-              <h2 className="font-heading text-3xl font-medium">The invitation</h2>
+            <section className="rounded-2xl border border-border bg-card p-4 text-center" data-testid="invitation">
+              <h2 className="font-heading text-2xl font-semibold">Invitation</h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 This code does not contain the medical record. It opens only the summary that was approved.
                 {latest.expired ? " This invitation has expired." : ` It expires ${new Date(latest.expiresAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.`}

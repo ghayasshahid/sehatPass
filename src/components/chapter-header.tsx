@@ -54,12 +54,16 @@ export function ChapterHeader({
   meaning: string;
 }) {
   return (
-    <header>
-      <h1 className="max-w-[16ch] text-[clamp(2rem,4vw,3.4rem)] font-medium tracking-[-0.025em] text-balance">
+    <header className="chapter-open">
+      {index && spine ? (
+        <p className="text-sm font-medium text-muted-foreground lg:hidden">
+          {index} of 4 · {spine}
+        </p>
+      ) : null}
+      <h1 className="mt-1 text-3xl leading-tight font-semibold tracking-tight text-balance">
         {title}
       </h1>
-      <p className="mt-4 max-w-[38rem] text-[clamp(1.05rem,1rem+0.3vw,1.2rem)] leading-normal">{meaning}</p>
-      {index && spine ? <span className="sr-only">{spine}</span> : null}
+      <p className="mt-2 max-w-2xl text-base leading-7 text-foreground">{meaning}</p>
     </header>
   );
 }
