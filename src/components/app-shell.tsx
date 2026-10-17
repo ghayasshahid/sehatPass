@@ -38,7 +38,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span className="block font-heading text-3xl leading-none font-semibold tracking-tight">
               SehatPass
             </span>
-            <span className="urdu-compact mt-2 block text-muted-foreground">صحت پاس</span>
+            <span className="urdu-compact mt-2 block text-muted-foreground" lang="ur" dir="rtl">
+              صحت پاس
+            </span>
           </Link>
 
           {showChapters ? (
@@ -122,7 +124,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-start justify-between gap-3">
               <Link href={doctorView ? "/doctor-pass" : "/"}>
                 <span className="block font-heading text-2xl leading-none font-semibold">SehatPass</span>
-                <span className="urdu-compact text-muted-foreground">صحت پاس</span>
+                <span className="urdu-compact text-muted-foreground" lang="ur" dir="rtl">
+                  صحت پاس
+                </span>
               </Link>
               <div className="flex flex-col items-end gap-1">
                 <p className="text-xs font-bold tracking-wide text-amber-950 uppercase">Fictional demo</p>
