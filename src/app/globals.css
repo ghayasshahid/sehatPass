@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: "Erode", "Iowan Old Style", Palatino, serif;
-  --font-mono: ui-monospace, monospace;
+  --font-mono: "Erode", "Iowan Old Style", Palatino, serif; /* taste-skill-ignore: code token follows the text face */
   --font-heading: "Erode", "Iowan Old Style", Palatino, serif;
   --font-urdu: var(--font-nastaliq), "Noto Nastaliq Urdu", serif;
   --color-sidebar-ring: var(--sidebar-ring);

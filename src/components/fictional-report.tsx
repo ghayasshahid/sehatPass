@@ -16,11 +16,11 @@ function Paper({
   children: React.ReactNode;
 }) {
   return (
-    <article className="relative overflow-hidden border border-stone-300 bg-[#fffdf8] px-5 py-6 text-stone-900 shadow-md">
+    <article data-ui className="relative overflow-hidden border border-stone-300 bg-[#fffdf8] px-5 py-6 text-stone-900 shadow-md">
       <div className={`h-2 ${accent}`} />
       <Stamp />
       <div className="relative mt-4">{children}</div>
-      <p className="relative mt-8 border-t border-stone-300 pt-3 text-xs leading-5 text-stone-600">
+      <p data-ui className="relative mt-8 border-t border-stone-300 pt-3 text-xs leading-5 text-stone-600">
         Synthetic document for the SehatPass prototype. Not a real patient, clinician, or laboratory. Do not use for care.
       </p>
     </article>
@@ -94,14 +94,14 @@ export function FictionalReport({ id }: { id: string }) {
         </dl>
         <table className="mt-6 w-full border-collapse text-left text-sm">
           <thead>
-            <tr className="border-b border-stone-400">
+            <tr data-ui className="border-b border-stone-400">
               <th className="py-2">Test</th>
               <th className="py-2">Result</th>
               <th className="py-2">Interval printed by the lab</th>
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-stone-200">
+            <tr data-ui className="border-b border-stone-200">
               <td className="py-3 font-semibold">HbA1c</td>
               <td className="py-3 text-lg font-semibold">HbA1c 7.2 %</td>
               <td className="py-3">4.0–5.6 %</td>
