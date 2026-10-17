@@ -15,6 +15,13 @@ export default function TimelinePage() {
   if (loading) return <p className="text-lg">Loading the timeline…</p>;
   if (!passport) return <p>The passport did not load. Use retry above.</p>;
 
+  const factsByDocument = new Map<string, typeof passport.facts>();
+  for (const fact of passport.facts) {
+    const rows = factsByDocument.get(fact.documentId);
+    if (rows) rows.push(fact);
+    else factsByDocument.set(fact.documentId, [fact]);
+  }
+
   return (
     <div className="grid gap-8">
       <ChapterHeader {...chapters[1]} />
@@ -35,10 +42,8 @@ export default function TimelinePage() {
       ) : (
         <ol className="chapter-body grid gap-4 border-l border-foreground/25 pl-5">
           {passport.documents.map((document) => {
-            const facts = passport.facts.filter(
-              (fact) =>
-                fact.documentId === document.id &&
-                (fact.kind === "measurement" || fact.kind === "medication" || fact.kind === "follow_up"),
+            const facts = (factsByDocument.get(document.id) ?? []).filter(
+              (fact) => fact.kind === "measurement" || fact.kind === "medication" || fact.kind === "follow_up",
             );
             const confirmed = facts.filter((fact) => fact.status === "confirmed").length;
             return (
