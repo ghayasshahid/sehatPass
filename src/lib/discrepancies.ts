@@ -12,10 +12,6 @@ function medKey(fact: Fact): string {
   return (fact.medicationName ?? fact.label).toLowerCase().trim();
 }
 
-function documentFor(documents: DocumentRecord[], id: string): DocumentRecord | undefined {
-  return documents.find((document) => document.id === id);
-}
-
 function statusWord(fact: Fact): string {
   return fact.status === "confirmed"
     ? "confirmed line"
@@ -26,6 +22,8 @@ export function deriveDiscrepancies(
   facts: Fact[],
   documents: DocumentRecord[],
 ): Discrepancy[] {
+  const documentsById = new Map(documents.map((document) => [document.id, document]));
+  const documentFor = (id: string) => documentsById.get(id);
   const discrepancies: Discrepancy[] = [];
   const medications = facts.filter((fact) => fact.kind === "medication");
   const groups = new Map<string, Fact[]>();
@@ -47,7 +45,7 @@ export function deriveDiscrepancies(
     if (distinct.size < 2) continue;
     const lines = [...distinct.values()].map((items) => {
       const fact = items[0];
-      const document = documentFor(documents, fact.documentId);
+      const document = documentFor(fact.documentId);
       const when = document ? formatDate(document.documentDate) : "unknown date";
       const where = document?.facilityName ?? "unknown facility";
       const marked = items.some((item) => item.patientMarkedCurrent)
@@ -69,7 +67,7 @@ export function deriveDiscrepancies(
   }
 
   for (const fact of facts.filter((item) => item.kind === "follow_up")) {
-    const document = documentFor(documents, fact.documentId);
+    const document = documentFor(fact.documentId);
     const when = document ? formatDate(document.documentDate) : "the document date";
     const where = document?.facilityName ?? "the facility";
     const type = document
