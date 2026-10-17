@@ -40,7 +40,7 @@ export default function TimelinePage() {
           </Button>
         </div>
       ) : (
-        <ol className="chapter-body grid gap-4 border-l border-foreground/25 pl-5">
+        <ol className="menu-sheet chapter-body grid gap-10">
           {passport.documents.map((document) => {
             const facts = (factsByDocument.get(document.id) ?? []).filter(
               (fact) => fact.kind === "measurement" || fact.kind === "medication" || fact.kind === "follow_up",
