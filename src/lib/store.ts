@@ -136,9 +136,12 @@ export async function readUpload(
   if (!safeSegment(userId) || !safeSegment(id)) return null;
   if (!userOwnsDocument(appDatabase(), userId, id)) return null;
   try {
-    const bytes = await readFile(path.join(uploadDir, userId, id));
-    const mime = (await readFile(path.join(uploadDir, userId, `${id}.mime`), "utf8")).trim();
-    return { bytes, mime };
+    const filePath = path.join(uploadDir, userId, id);
+    const [bytes, mime] = await Promise.all([
+      readFile(filePath),
+      readFile(`${filePath}.mime`, "utf8"),
+    ]);
+    return { bytes, mime: mime.trim() };
   } catch {
     return null;
   }
