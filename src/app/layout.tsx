@@ -39,8 +39,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${sans.variable} ${urdu.variable} ${naskh.variable} antialiased`}>
+    <html lang="en" className={`${sans.variable} ${urdu.variable} ${naskh.variable} font-sans`}>
+      <body className="antialiased">
         <PassportProvider>
           <AppShell>{children}</AppShell>
         </PassportProvider>
