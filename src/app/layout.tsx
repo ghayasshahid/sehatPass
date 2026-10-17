@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
+import { Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
 
 import { AppShell } from "@/components/app-shell";
 import { PassportProvider } from "@/components/passport-provider";
 
 import "./globals.css";
-
-const sans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-plex",
-  display: "swap",
-});
 
 const urdu = Noto_Nastaliq_Urdu({
   subsets: ["arabic"],
@@ -39,7 +32,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${sans.variable} ${urdu.variable} ${naskh.variable} font-sans`}>
+    <html lang="en" className={`${urdu.variable} ${naskh.variable} font-sans`}>
+      <head>
+        <link rel="preconnect" href="https://api.fontshare.com" />
+        <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="" />
+        <link
+          href="https://api.fontshare.com/v2/css?f[]=erode@400,500,600&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="antialiased">
         <PassportProvider>
           <AppShell>{children}</AppShell>
