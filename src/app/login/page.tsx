@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { ChapterHeader } from "@/components/chapter-header";
 import { Button } from "@/components/ui/button";
 
 const field =
@@ -33,14 +34,11 @@ export default function LoginPage() {
   }
 
   return (
-    <form onSubmit={(event) => void onSubmit(event)} className="grid gap-4 rounded-2xl border border-border bg-card p-5">
-      <header>
-        <p className="text-sm font-semibold tracking-wide text-primary uppercase">Your records</p>
-        <h1 className="mt-1 font-heading text-4xl font-semibold">Log in</h1>
-        <p className="mt-3 leading-7 text-muted-foreground">
-          A patient only sees the documents, facts, and DoctorPass invitations saved for their account.
-        </p>
-      </header>
+    <form onSubmit={(event) => void onSubmit(event)} className="grid gap-5">
+      <ChapterHeader
+        title="Log in"
+        meaning="This screen opens the passport saved for your account. It does not show anyone else's records."
+      />
       <label className="grid gap-2 text-sm font-semibold">
         Email
         <input

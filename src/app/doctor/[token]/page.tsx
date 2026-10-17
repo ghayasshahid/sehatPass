@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 
+import { ChapterHeader } from "@/components/chapter-header";
 import { SummaryView } from "@/components/summary-view";
 import { Button } from "@/components/ui/button";
 import type { VisitSummary } from "@/lib/types";
@@ -45,9 +46,12 @@ export default function DoctorViewPage({ params }: { params: Promise<{ token: st
 
   if (error || !summary) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-5" data-testid="doctor-error">
-        <h1 className="font-heading text-3xl font-semibold">Doctor view</h1>
-        <p className="mt-3 leading-7">{error}</p>
+      <div className="grid gap-6" data-testid="doctor-error">
+        <ChapterHeader
+          title="Doctor view"
+          meaning="This invitation could not be opened, so no medical record is shown."
+        />
+        <p className="chapter-body leading-7">{error}</p>
         <Button asChild className="mt-4 min-h-12 px-4 text-base">
           <Link href="/doctor-pass">Return to DoctorPass</Link>
         </Button>
@@ -56,19 +60,20 @@ export default function DoctorViewPage({ params }: { params: Promise<{ token: st
   }
 
   return (
-    <div className="grid gap-6" data-testid="doctor-view">
-      <header>
-        <p className="text-sm font-semibold tracking-wide text-primary uppercase">Invited clinician</p>
-        <h1 className="mt-1 font-heading text-4xl font-semibold">Approved summary</h1>
-        <p className="mt-3 leading-7">
-          {summary.patientName === "Sana Ahmed"
-            ? "Sana Ahmed is a fictional demo patient. You are seeing only what she approved."
-            : `You are seeing only the summary ${summary.patientName} approved.`}
-          {expiresAt
-            ? ` This invitation expires ${new Date(expiresAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.`
-            : ""}
+    <div className="grid gap-8" data-testid="doctor-view">
+      <ChapterHeader
+        title="Approved summary"
+        meaning={
+          summary.patientName === "Sana Ahmed"
+            ? "Sana Ahmed is a fictional demo patient. You are seeing only the summary she approved. This page is the invitation, not the full record."
+            : `You are seeing only the summary ${summary.patientName} approved. This page is the invitation, not the full record.`
+        }
+      />
+      {expiresAt ? (
+        <p className="chapter-body -mt-4 text-sm leading-6 text-muted-foreground">
+          This invitation expires {new Date(expiresAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.
         </p>
-      </header>
+      ) : null}
       <SummaryView summary={summary} audience="doctor" />
       <p className="font-heading text-2xl leading-snug font-semibold">
         The patient changed hospitals. Their medical memory didn&apos;t disappear.

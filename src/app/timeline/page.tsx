@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { ChapterHeader, chapters } from "@/components/chapter-header";
 import { StatusBadge } from "@/components/status-badge";
 import { usePassport } from "@/components/passport-provider";
 import { Button } from "@/components/ui/button";
@@ -15,17 +16,14 @@ export default function TimelinePage() {
   if (!passport) return <p>The passport did not load. Use retry above.</p>;
 
   return (
-    <div className="grid gap-6">
-      <header>
-        <p className="text-sm font-semibold tracking-wide text-primary uppercase">Across facilities</p>
-        <h1 className="mt-1 font-heading text-4xl font-semibold">Medical timeline</h1>
-        <p className="mt-3 leading-7 text-muted-foreground">
-          Sana Ahmed (fictional demo). Confirmed lines are what she accepted. Proposed lines are still waiting.
-        </p>
-      </header>
+    <div className="grid gap-8">
+      <ChapterHeader {...chapters[1]} />
+      <p className="chapter-body -mt-4 text-sm leading-6 text-muted-foreground">
+        A confirmed line is one you accepted. A proposed line is still waiting.
+      </p>
 
       {!passport.loaded ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card p-5">
+        <div className="chapter-body rounded-2xl border border-dashed border-border bg-card p-5">
           <h2 className="font-heading text-2xl font-semibold">No records on the timeline</h2>
           <p className="mt-2 leading-7">
             Load the fictional set on Upload and verify. The timeline stays empty until those documents are in the session.
@@ -35,7 +33,7 @@ export default function TimelinePage() {
           </Button>
         </div>
       ) : (
-        <ol className="grid gap-4 border-l-2 border-primary/30 pl-4">
+        <ol className="chapter-body grid gap-4 border-l border-foreground/25 pl-5">
           {passport.documents.map((document) => {
             const facts = passport.facts.filter(
               (fact) =>

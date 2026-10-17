@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { ChapterHeader, chapters } from "@/components/chapter-header";
 import { FactList } from "@/components/fact-list";
 import { usePassport } from "@/components/passport-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -49,20 +50,14 @@ export default function VerifyPage() {
   }
 
   return (
-    <div className="grid gap-6">
-      <header>
-        <p className="text-sm font-semibold tracking-wide text-primary uppercase">Medical memory</p>
-        <h1 className="mt-1 font-heading text-4xl leading-tight font-semibold">Upload and verify</h1>
-        <p className="mt-3 text-lg leading-8">
-          Your next doctor should know what your last doctor knew.
-        </p>
-        <p className="mt-2 leading-7 text-muted-foreground">
-          Sana Ahmed (fictional demo), an adult in Lahore, is here for diabetes follow-up. Four paper records from four facilities were never on one chart. This prototype connects them. It does not predict future results.
-        </p>
-      </header>
+    <div className="grid gap-8">
+      <ChapterHeader {...chapters[0]} />
+      <p className="chapter-body -mt-4 text-sm leading-6 text-muted-foreground">
+        Sana Ahmed, fictional, Lahore. Diabetes follow-up across four facilities.
+      </p>
 
       {!passport.loaded ? (
-        <section className="grid gap-4">
+        <section className="chapter-body grid gap-4">
           <div className="rounded-2xl border border-border bg-card p-4">
             <h2 className="font-heading text-xl font-semibold">Bundled fictional set</h2>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -134,7 +129,7 @@ export default function VerifyPage() {
           </div>
         </section>
       ) : (
-        <section className="grid gap-4">
+        <section className="chapter-body grid gap-4">
           {passport.extraction ? (
             <Alert data-testid="extraction-disclosure">
               <AlertTitle>{passport.extraction.label}</AlertTitle>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ChapterHeader } from "@/components/chapter-header";
 import { FictionalReport, isBundledReport } from "@/components/fictional-report";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth";
@@ -33,8 +34,10 @@ export default async function ReportPage({
         <Button asChild variant="outline" className="min-h-12 w-fit px-4 text-base">
           <Link href={back}>Back</Link>
         </Button>
-        <p className="text-sm font-semibold tracking-wide text-primary uppercase">Original report</p>
-        <h1 className="font-heading text-3xl font-semibold">Fictional source document</h1>
+        <ChapterHeader
+          title="Fictional source document"
+          meaning="This is the paper the facts were read from. It is synthetic, and confirming a field does not change what is printed here."
+        />
         <FictionalReport id={id} />
       </div>
     );
@@ -43,9 +46,11 @@ export default async function ReportPage({
   const user = id.startsWith("upload-") ? await getCurrentUser() : null;
   if (id.startsWith("upload-") && !user) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <h1 className="font-heading text-3xl font-semibold">Sign in to open your file</h1>
-        <p className="mt-2 leading-7">Uploaded reports stay with the patient who added them.</p>
+      <div className="grid gap-4">
+        <ChapterHeader
+          title="Sign in to open your file"
+          meaning="Uploaded reports stay with the patient who added them. This screen does not show the file."
+        />
         <Button asChild className="mt-4 min-h-12 px-4 text-base">
           <Link href="/login">Log in</Link>
         </Button>
@@ -55,9 +60,11 @@ export default async function ReportPage({
   const upload = user ? await readUpload(user.id, id) : null;
   if (!upload) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <h1 className="font-heading text-3xl font-semibold">Report not found</h1>
-        <p className="mt-2 leading-7">No original report is stored for that id. Nothing clinical is being inferred.</p>
+      <div className="grid gap-4">
+        <ChapterHeader
+          title="Report not found"
+          meaning="No original report is stored for that id. Nothing clinical is being inferred."
+        />
         <Button asChild className="mt-4 min-h-12 px-4 text-base">
           <Link href={back}>Back</Link>
         </Button>
@@ -71,10 +78,10 @@ export default async function ReportPage({
       <Button asChild variant="outline" className="min-h-12 w-fit px-4 text-base">
         <Link href={back}>Back</Link>
       </Button>
-      <h1 className="font-heading text-3xl font-semibold">Uploaded file</h1>
-      <p className="text-sm text-muted-foreground">
-        This is the file that was sent for extraction. It is not confirmed medical information.
-      </p>
+      <ChapterHeader
+        title="Uploaded file"
+        meaning="This is the file that was sent for extraction. It is not confirmed medical information."
+      />
       {upload.mime.startsWith("image/") ? (
         // User-supplied demo upload, served from the local session store.
         // eslint-disable-next-line @next/next/no-img-element

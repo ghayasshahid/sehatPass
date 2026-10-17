@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { ChapterHeader, chapters } from "@/components/chapter-header";
 import { Hba1cChart } from "@/components/hba1c-chart";
 import { StatusBadge } from "@/components/status-badge";
 import { usePassport } from "@/components/passport-provider";
@@ -50,17 +51,11 @@ export default function ChangeRadarPage() {
   if (!passport) return <p>The passport did not load. Use retry above.</p>;
 
   return (
-    <div className="grid gap-6">
-      <header>
-        <p className="text-sm font-semibold tracking-wide text-primary uppercase">Recorded change</p>
-        <h1 className="mt-1 font-heading text-4xl font-semibold">Change Radar</h1>
-        <p className="mt-3 leading-7 text-muted-foreground">
-          Compatible readings are compared in code. HbA1c is plotted only after you confirm it, and only when the unit is %.
-        </p>
-      </header>
+    <div className="grid gap-8">
+      <ChapterHeader {...chapters[2]} />
 
       {!passport.loaded ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card p-5">
+        <div className="chapter-body rounded-2xl border border-dashed border-border bg-card p-5">
           <h2 className="font-heading text-2xl font-semibold">No readings to compare</h2>
           <p className="mt-2 leading-7">Load the fictional records, then confirm the HbA1c lines.</p>
           <Button asChild className="mt-4 min-h-12 px-4 text-base">
@@ -68,7 +63,7 @@ export default function ChangeRadarPage() {
           </Button>
         </div>
       ) : (
-        <>
+        <div className="chapter-body grid gap-8">
           <section className="grid gap-3" data-testid="change-statement">
             {passport.change.ready && passport.change.statement ? (
               <>
@@ -142,7 +137,7 @@ export default function ChangeRadarPage() {
               </p>
             ) : null}
           </section>
-        </>
+        </div>
       )}
     </div>
   );

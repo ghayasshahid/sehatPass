@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { ChapterHeader } from "@/components/chapter-header";
 import { Button } from "@/components/ui/button";
 
 const field =
@@ -34,14 +35,11 @@ export default function SignupPage() {
   }
 
   return (
-    <form onSubmit={(event) => void onSubmit(event)} className="grid gap-4 rounded-2xl border border-border bg-card p-5">
-      <header>
-        <p className="text-sm font-semibold tracking-wide text-primary uppercase">Your records</p>
-        <h1 className="mt-1 font-heading text-4xl font-semibold">Sign up</h1>
-        <p className="mt-3 leading-7 text-muted-foreground">
-          Passwords are stored as a hash. After you sign in, load the fictional Sana Ahmed demo or add your own document.
-        </p>
-      </header>
+    <form onSubmit={(event) => void onSubmit(event)} className="grid gap-5">
+      <ChapterHeader
+        title="Sign up"
+        meaning="Create an account on this device. After you sign in, load the fictional Sana Ahmed records or add a document of your own."
+      />
       <label className="grid gap-2 text-sm font-semibold">
         Name
         <input

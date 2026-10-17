@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { ChapterHeader, chapters } from "@/components/chapter-header";
 import { usePassport } from "@/components/passport-provider";
 import { StatusBadge } from "@/components/status-badge";
 import { SummaryView } from "@/components/summary-view";
@@ -22,17 +23,11 @@ export default function DoctorPassPage() {
   const latest = passport.invitations[0];
 
   return (
-    <div className="grid gap-6">
-      <header>
-        <p className="text-sm font-semibold tracking-wide text-primary uppercase">Patient-controlled handoff</p>
-        <h1 className="mt-1 font-heading text-4xl font-semibold">DoctorPass</h1>
-        <p className="mt-3 leading-7 text-muted-foreground">
-          Sana Ahmed (fictional demo) reviews what a doctor would see. The QR code carries a short-lived invitation, not the medical record.
-        </p>
-      </header>
+    <div className="grid gap-8">
+      <ChapterHeader {...chapters[3]} />
 
       {!passport.loaded ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card p-5">
+        <div className="chapter-body rounded-2xl border border-dashed border-border bg-card p-5">
           <h2 className="font-heading text-2xl font-semibold">Nothing to share yet</h2>
           <p className="mt-2 leading-7">Load and confirm the fictional records before approving a visit summary.</p>
           <Button asChild className={`mt-4 ${tap}`}>
@@ -40,7 +35,7 @@ export default function DoctorPassPage() {
           </Button>
         </div>
       ) : (
-        <>
+        <div className="chapter-body grid gap-6">
           <section className="rounded-2xl border border-border bg-card p-4">
             <h2 className="font-heading text-2xl font-semibold">Mark current treatment yourself</h2>
             <p className="mt-2 leading-7 text-muted-foreground">
@@ -135,7 +130,7 @@ export default function DoctorPassPage() {
               </p>
             </section>
           ) : null}
-        </>
+        </div>
       )}
     </div>
   );
