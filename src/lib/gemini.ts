@@ -5,13 +5,13 @@ import { randomBytes } from "crypto";
 import { clip } from "@/lib/format";
 import type { DocumentRecord, DocumentType, Fact } from "@/lib/types";
 
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-3.8-flash";
 
 interface GeminiFact {
   kind?: string;
   label?: string;
   analyte?: string;
-  value?: number;
+  value?: number | string;
   unit?: string;
   medicationName?: string;
   doseText?: string;
@@ -41,13 +41,17 @@ export async function extractWithGemini(input: {
   if (!key) throw new Error("GEMINI_API_KEY is not set.");
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(key)}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": key,
+      },
       body: JSON.stringify({
         contents: [
           {
+            role: "user",
             parts: [
               {
                 text: `Extract proposed fields from this single medical document. Return JSON only:
@@ -55,8 +59,8 @@ export async function extractWithGemini(input: {
 Do not diagnose. Do not choose a current dose. Do not invent values that are not printed. If unsure, omit the fact.`,
               },
               {
-                inline_data: {
-                  mime_type: input.mimeType,
+                inlineData: {
+                  mimeType: input.mimeType,
                   data: input.base64,
                 },
               },
@@ -69,13 +73,21 @@ Do not diagnose. Do not choose a current dose. Do not invent values that are not
   );
 
   if (!response.ok) {
-    throw new Error("Gemini did not return an extraction. Nothing was confirmed.");
+    throw new Error(`Gemini did not return an extraction (${await geminiError(response)}). Nothing was confirmed.`);
   }
 
   const payload = (await response.json()) as {
-    candidates?: { content?: { parts?: { text?: string }[] } }[];
+    candidates?: { content?: { parts?: { text?: string; thought?: boolean }[] }; finishReason?: string }[];
   };
-  const text = payload.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("") ?? "";
+  const text =
+    payload.candidates?.[0]?.content?.parts
+      ?.filter((part) => !part.thought)
+      .map((part) => part.text ?? "")
+      .join("") ?? "";
+  if (!text.trim()) {
+    const reason = payload.candidates?.[0]?.finishReason ?? "no text";
+    throw new Error(`Gemini returned no extraction (${reason}). Nothing was confirmed.`);
+  }
   let parsed: GeminiPayload;
   try {
     parsed = JSON.parse(stripFences(text)) as GeminiPayload;
@@ -153,6 +165,19 @@ Do not diagnose. Do not choose a current dose. Do not invent values that are not
   return { document, facts };
 }
 
+async function geminiError(response: Response): Promise<string> {
+  const raw = await response.text();
+  let message = `HTTP ${response.status}`;
+  try {
+    const parsed = JSON.parse(raw) as { error?: { message?: string; status?: string } };
+    if (parsed.error?.status) message += ` ${parsed.error.status}`;
+    if (parsed.error?.message) message += `: ${parsed.error.message}`;
+  } catch {
+    if (raw.trim()) message += `: ${raw.trim()}`;
+  }
+  return message.replace(/key=[^&\s]+/gi, "key=redacted").slice(0, 320);
+}
+
 function documentTypeLabel(type: DocumentType): string {
   if (type === "prescription") return "Prescription";
   if (type === "lab_report") return "Lab report";
@@ -174,7 +199,8 @@ function mapFact(
   sourceRef: string,
 ): Fact | null {
   const sourceQuote = clip(item.sourceQuote || "Extracted line", 400);
-  if (item.kind === "measurement" && typeof item.value === "number" && item.unit) {
+  const numericValue = typeof item.value === "number" ? item.value : Number(item.value);
+  if (item.kind === "measurement" && Number.isFinite(numericValue) && item.unit) {
     const analyte =
       item.analyte === "hba1c" || item.analyte === "fasting_glucose"
         ? item.analyte
@@ -186,7 +212,7 @@ function mapFact(
       kind: "measurement",
       label: clip(item.label || "Measurement", 80),
       analyte,
-      value: item.value,
+      value: numericValue,
       unit: clip(item.unit, 40),
       status: "proposed",
       patientMarkedCurrent: null,
