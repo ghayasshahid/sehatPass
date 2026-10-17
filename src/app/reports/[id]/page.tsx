@@ -24,8 +24,7 @@ export default async function ReportPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ from?: string }>;
 }) {
-  const { id } = await params;
-  const query = await searchParams;
+  const [{ id }, query] = await Promise.all([params, searchParams]);
   const back = backHref(query.from);
 
   if (isBundledReport(id)) {
