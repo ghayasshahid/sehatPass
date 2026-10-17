@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-atkinson), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
-  --font-heading: var(--font-source-serif), ui-serif, Georgia, serif;
+  --font-heading: var(--font-fraunces), ui-serif, Georgia, serif;
   --font-urdu: var(--font-nastaliq), "Noto Nastaliq Urdu", serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -50,24 +50,24 @@
 }
 
 :root {
-  --background: oklch(0.972 0.012 95);
-  --foreground: oklch(0.28 0.03 230);
-  --card: oklch(0.995 0.004 95);
-  --card-foreground: oklch(0.28 0.03 230);
-  --popover: oklch(0.995 0.004 95);
-  --popover-foreground: oklch(0.28 0.03 230);
-  --primary: oklch(0.45 0.08 190);
-  --primary-foreground: oklch(0.985 0.01 95);
-  --secondary: oklch(0.94 0.02 190);
-  --secondary-foreground: oklch(0.32 0.04 200);
-  --muted: oklch(0.945 0.012 95);
-  --muted-foreground: oklch(0.46 0.02 230);
-  --accent: oklch(0.93 0.03 85);
-  --accent-foreground: oklch(0.32 0.04 70);
-  --destructive: oklch(0.55 0.14 35);
-  --border: oklch(0.88 0.015 90);
-  --input: oklch(0.88 0.015 90);
-  --ring: oklch(0.5 0.08 190);
+  --background: oklch(0.955 0.018 88);
+  --foreground: oklch(0.24 0.02 70);
+  --card: oklch(0.978 0.012 90);
+  --card-foreground: oklch(0.24 0.02 70);
+  --popover: oklch(0.978 0.012 90);
+  --popover-foreground: oklch(0.24 0.02 70);
+  --primary: oklch(0.42 0.09 163);
+  --primary-foreground: oklch(0.97 0.012 90);
+  --secondary: oklch(0.93 0.025 160);
+  --secondary-foreground: oklch(0.28 0.04 165);
+  --muted: oklch(0.935 0.014 88);
+  --muted-foreground: oklch(0.42 0.02 70);
+  --accent: oklch(0.94 0.04 85);
+  --accent-foreground: oklch(0.32 0.05 70);
+  --destructive: oklch(0.5 0.14 35);
+  --border: oklch(0.86 0.02 85);
+  --input: oklch(0.86 0.02 85);
+  --ring: oklch(0.42 0.09 163);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -123,12 +123,84 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-size: 17px;
-    line-height: 1.5;
+    line-height: 1.55;
+    background-color: var(--background);
+    background-image:
+      radial-gradient(1100px 640px at -8% -10%, oklch(0.9 0.045 82 / 0.55), transparent 58%),
+      radial-gradient(720px 480px at 112% -8%, oklch(0.9 0.04 163 / 0.16), transparent 52%);
   }
   html {
     @apply font-sans;
+  }
+}
+
+.book-paper {
+  position: relative;
+  isolation: isolate;
+}
+
+.book-paper::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>");
+}
+
+.book-fold {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  transform-origin: top center;
+  background: color-mix(in oklch, var(--foreground) 55%, transparent);
+  animation: fold-draw 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.chapter-open h1 {
+  animation: chapter-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.chapter-meaning {
+  animation: chapter-rise 0.6s 0.16s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.chapter-body {
+  animation: chapter-rise 0.65s 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes fold-draw {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes chapter-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book-fold,
+  .chapter-open h1,
+  .chapter-meaning,
+  .chapter-body {
+    animation: none;
   }
 }
 

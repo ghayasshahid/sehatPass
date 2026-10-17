@@ -2,8 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import type { ConfirmationStatus } from "@/lib/types";
 
 const styles: Record<ConfirmationStatus, string> = {
-  proposed: "border-sky-200 bg-sky-100 text-sky-950",
-  confirmed: "border-teal-200 bg-teal-100 text-teal-950",
+  proposed: "border-border bg-muted text-foreground",
+  confirmed: "border-primary/30 bg-secondary text-secondary-foreground",
   unresolved: "border-amber-300 bg-amber-100 text-amber-950",
 };
 

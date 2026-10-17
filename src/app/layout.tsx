@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
-import { Noto_Naskh_Arabic, Noto_Nastaliq_Urdu, Source_Sans_3, Source_Serif_4 } from "next/font/google";
+import { Atkinson_Hyperlegible, Fraunces, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
 
 import { AppShell } from "@/components/app-shell";
 import { PassportProvider } from "@/components/passport-provider";
 
 import "./globals.css";
 
-const sans = Source_Sans_3({
+const sans = Atkinson_Hyperlegible({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-source-sans",
+  weight: ["400", "700"],
+  variable: "--font-atkinson",
   display: "swap",
 });
 
-const serif = Source_Serif_4({
+const serif = Fraunces({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
-  variable: "--font-source-serif",
+  variable: "--font-fraunces",
   display: "swap",
 });
 
