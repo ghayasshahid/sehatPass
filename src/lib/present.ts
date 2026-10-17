@@ -2,7 +2,7 @@ import "server-only";
 
 import QRCode from "qrcode";
 
-import { compareHbA1c } from "@/lib/changes";
+import { compareHbA1c, compareMatchingTests } from "@/lib/changes";
 import { deriveDiscrepancies } from "@/lib/discrepancies";
 import { buildSummary } from "@/lib/summary";
 import { applyConfirmedMeta } from "@/lib/store";
@@ -12,6 +12,7 @@ export async function present(session: Session): Promise<PassportView> {
   applyConfirmedMeta(session);
   session.discrepancies = deriveDiscrepancies(session.facts, session.documents);
   const change = compareHbA1c(session.facts, session.documents);
+  const matchingTests = compareMatchingTests(session.facts, session.documents);
   const summary = buildSummary(session, change, null);
   const invitations = await Promise.all(
     session.invitations.map(async (invitation) => ({
@@ -40,6 +41,7 @@ export async function present(session: Session): Promise<PassportView> {
     invitations,
     summary,
     change,
+    matchingTests,
     providers: {
       gemini: Boolean(process.env.GEMINI_API_KEY),
       groq: Boolean(process.env.GROQ_API_KEY),

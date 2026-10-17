@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { compareHbA1c } from "@/lib/changes";
+import { compareHbA1c, compareMatchingTests } from "@/lib/changes";
 import { createFictionalRecords, PATIENT } from "@/lib/demo-case";
 import { deriveDiscrepancies } from "@/lib/discrepancies";
 import { explainFromConfirmed, explanationIsGrounded } from "@/lib/explain";
@@ -10,6 +10,7 @@ import { hashPassword, verifyPassword } from "@/lib/passwords";
 import {
   findInvitation,
   insertUser,
+  invitationUploadOwner,
   loadPassport,
   openDatabase,
   savePassport,
@@ -40,8 +41,25 @@ describe("fictional HbA1c change", () => {
     assert.equal(change.delta, 1.8);
     assert.equal(
       change.statement,
-      "The recorded HbA1c increased from 7.2% (18 Jan 2026) to 9.0% (22 Jul 2026) across these reports. You may want to discuss this change with your doctor.",
+      "The recorded HbA1c increased from 7.2% (18 Jan 2026) to 9.0% (22 Jul 2026) across these reports. Take this change to the next visit.",
     );
+  });
+
+  it("compares another confirmed test across visits and leaves a single reading alone", () => {
+    const confirmed = confirmedFacts(facts);
+    assert.equal(compareMatchingTests(confirmed, documents).length, 0);
+    const later = confirmed.map((fact) =>
+      fact.id === "fact-lcl-glucose"
+        ? { ...fact, id: "fact-later-glucose", documentId: "doc-shifa", value: 160 }
+        : fact,
+    );
+    later.push(confirmed.find((fact) => fact.id === "fact-lcl-glucose") as Fact);
+    const series = compareMatchingTests(later, documents);
+    assert.equal(series.length, 1);
+    assert.match(series[0].statement, /136 mg\/dL/);
+    assert.match(series[0].statement, /160 mg\/dL/);
+    assert.match(series[0].statement, /next visit/);
+    assert.doesNotMatch(series[0].statement, /disease|diagnos/i);
   });
 
   it("leaves a different unit off the series", () => {
@@ -94,6 +112,42 @@ describe("uncertainty", () => {
     assert.match(summary.currentMedicationsNote, /does not choose a dose/);
     assert.match(summary.allergiesNote, /No allergies/);
     assert.equal(summary.recentLabs.length, 4);
+    assert.equal(summary.approvedDocuments.length, 4);
+    assert.deepEqual(
+      summary.approvedDocuments.map((document) => document.id),
+      ["doc-al-noor", "doc-lahore-city-lab", "doc-medicare", "doc-shifa"],
+    );
+    const shared = JSON.stringify(summary.approvedDocuments);
+    assert.match(shared, /7\.2%/);
+    assert.match(shared, /8\.1%/);
+    assert.match(shared, /9\.0%/);
+    assert.match(shared, /500 mg/);
+    assert.match(shared, /1000 mg/);
+
+    const hidden = confirmed.map((fact) =>
+      fact.id === "fact-shifa-hba1c" ? { ...fact, status: "proposed" as const } : fact,
+    );
+    const partial = buildSummary(
+      {
+        patient: {
+          id: "patient-sana-ahmed",
+          displayName: "Sana Ahmed",
+          fictional: true,
+          city: "Lahore",
+          focus: "Diabetes follow-up",
+        },
+        documents,
+        facts: hidden,
+        discrepancies: deriveDiscrepancies(hidden, documents),
+      },
+      compareHbA1c(hidden, documents),
+    );
+    assert.equal(
+      partial.approvedDocuments.some((document) =>
+        document.lines.some((line) => line.text.includes("9.0")),
+      ),
+      false,
+    );
 
     const marked = confirmed.map((fact) =>
       fact.id === "fact-al-noor-metformin"
@@ -131,6 +185,8 @@ describe("explanation and invitation", () => {
     assert.match(explanation.english, /8\.1%/);
     assert.match(explanation.english, /9\.0%/);
     assert.match(explanation.english, /not a diagnosis/);
+    assert.match(explanation.english, /next visit/);
+    assert.match(explanation.urdu, /اگلی/);
     assert.match(explanation.urdu, /7\.2%/);
     assert.match(explanation.urdu, /9\.0%/);
     assert.match(explanation.urdu, /ڈاکٹر/);
@@ -207,7 +263,7 @@ describe("accounts and saved records", () => {
           token,
           url: invitationUrl("http://127.0.0.1:4721", token),
           createdAt,
-          expiresAt: "2026-10-17T02:00:00.000Z",
+          expiresAt: "2026-10-18T00:00:00.000Z",
           snapshot,
         },
       ],
@@ -262,6 +318,8 @@ describe("accounts and saved records", () => {
     assert.doesNotMatch(savedA.invitations[0]?.url ?? "", /7\.2|metformin|hba1c/i);
     const invitation = findInvitation(database, token);
     assert.equal(invitation?.snapshot.patientName, "Sana Ahmed");
+    assert.equal(invitationUploadOwner(database, token, "doc-lahore-city-lab"), "user-a");
+    assert.equal(invitationUploadOwner(database, token, "not-in-the-invitation"), null);
     assert.equal(JSON.stringify(invitation).includes("user-b"), false);
     database.close();
   });

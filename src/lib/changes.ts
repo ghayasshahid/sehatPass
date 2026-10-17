@@ -1,5 +1,7 @@
-import { formatDate, formatHbA1c, round1 } from "@/lib/format";
-import type { ChangePoint, ChangeResult, DocumentRecord, Fact } from "@/lib/types";
+import { formatDate, formatHbA1c, formatMeasurement, round1 } from "@/lib/format";
+import type { ChangePoint, ChangeResult, DocumentRecord, Fact, MatchingTest } from "@/lib/types";
+
+const NEXT_VISIT = "Take this change to the next visit.";
 
 function documentsById(documents: DocumentRecord[]) {
   return new Map(documents.map((document) => [document.id, document]));
@@ -96,8 +98,8 @@ export function compareHbA1c(
     delta > 0 ? "increased" : delta < 0 ? "decreased" : "stayed the same";
   const statement =
     direction === "stayed the same"
-      ? `The recorded HbA1c stayed the same at ${formatHbA1c(first.value)}% from ${formatDate(first.date)} to ${formatDate(last.date)} across these reports. You may want to discuss this with your doctor.`
-      : `The recorded HbA1c ${direction} from ${formatHbA1c(first.value)}% (${formatDate(first.date)}) to ${formatHbA1c(last.value)}% (${formatDate(last.date)}) across these reports. You may want to discuss this change with your doctor.`;
+      ? `The recorded HbA1c stayed the same at ${formatHbA1c(first.value)}% from ${formatDate(first.date)} to ${formatDate(last.date)} across these reports. ${NEXT_VISIT}`
+      : `The recorded HbA1c ${direction} from ${formatHbA1c(first.value)}% (${formatDate(first.date)}) to ${formatHbA1c(last.value)}% (${formatDate(last.date)}) across these reports. ${NEXT_VISIT}`;
 
   return {
     analyte: "hba1c",
@@ -110,4 +112,65 @@ export function compareHbA1c(
     statement,
     delta,
   };
+}
+
+export function compareMatchingTests(facts: Fact[], documents: DocumentRecord[]): MatchingTest[] {
+  const byDocument = documentsById(documents);
+  const confirmed = facts.filter(
+    (fact) =>
+      fact.kind === "measurement" &&
+      fact.status === "confirmed" &&
+      fact.value !== undefined &&
+      Number.isFinite(fact.value) &&
+      fact.unit &&
+      !(fact.analyte === "hba1c" && fact.unit === "%"),
+  );
+  const groups = new Map<string, Fact[]>();
+  for (const fact of confirmed) {
+    const name = (fact.analyte ?? fact.label).toLowerCase().trim();
+    const key = `${name}|${fact.unit?.toLowerCase().trim()}`;
+    const list = groups.get(key) ?? [];
+    list.push(fact);
+    groups.set(key, list);
+  }
+
+  const series: MatchingTest[] = [];
+  for (const group of groups.values()) {
+    const sorted = [...group].sort((a, b) => {
+      const left = byDocument.get(a.documentId)?.documentDate ?? "";
+      const right = byDocument.get(b.documentId)?.documentDate ?? "";
+      return left.localeCompare(right) || a.id.localeCompare(b.id);
+    });
+    const plotted: { date: string; value: number }[] = [];
+    const seen = new Map<string, number>();
+    for (const fact of sorted) {
+      const date = byDocument.get(fact.documentId)?.documentDate ?? "";
+      const value = fact.unit === "%" ? round1(fact.value as number) : (fact.value as number);
+      const previous = seen.get(date);
+      if (previous === undefined) {
+        seen.set(date, value);
+        plotted.push({ date, value });
+        continue;
+      }
+      if (previous !== value) {
+        const index = plotted.findIndex((point) => point.date === date);
+        if (index >= 0) plotted.splice(index, 1);
+        seen.set(date, Number.NaN);
+      }
+    }
+    const points = plotted.filter((point) => Number.isFinite(seen.get(point.date)));
+    if (points.length < 2) continue;
+    const first = points[0];
+    const last = points[points.length - 1];
+    const unit = sorted[0].unit as string;
+    const label = sorted[0].label;
+    const direction =
+      last.value > first.value ? "increased" : last.value < first.value ? "decreased" : "stayed the same";
+    const statement =
+      direction === "stayed the same"
+        ? `The recorded ${label} stayed the same at ${formatMeasurement(first.value, unit)} from ${formatDate(first.date)} to ${formatDate(last.date)}. ${NEXT_VISIT}`
+        : `The recorded ${label} ${direction} from ${formatMeasurement(first.value, unit)} (${formatDate(first.date)}) to ${formatMeasurement(last.value, unit)} (${formatDate(last.date)}). ${NEXT_VISIT}`;
+    series.push({ label, unit, statement });
+  }
+  return series;
 }

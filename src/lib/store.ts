@@ -60,7 +60,26 @@ export function applyConfirmedMeta(session: Session) {
         fact.textValue,
     );
     if (facility?.textValue) document.facilityName = facility.textValue;
+    const typeFact = session.facts.find(
+      (fact) =>
+        fact.documentId === document.id &&
+        fact.kind === "document_type" &&
+        fact.status === "confirmed" &&
+        fact.textValue,
+    );
+    const documentType = typeFact?.textValue ? documentTypeFromText(typeFact.textValue) : null;
+    if (documentType) document.documentType = documentType;
   }
+}
+
+function documentTypeFromText(
+  value: string,
+): "prescription" | "lab_report" | "prescription_with_lab" | null {
+  const normalized = value.toLowerCase();
+  if (normalized.includes("attached") || normalized.includes("with lab")) return "prescription_with_lab";
+  if (normalized.includes("prescription")) return "prescription";
+  if (normalized.includes("lab")) return "lab_report";
+  return null;
 }
 
 function readSession(owner: Account): Session {

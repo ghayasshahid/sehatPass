@@ -1,6 +1,7 @@
 import { compareHbA1c } from "@/lib/changes";
 import { documentTypeLabel, formatDate, formatMeasurement } from "@/lib/format";
 import type {
+  ApprovedDocument,
   ChangeResult,
   DocumentRecord,
   Fact,
@@ -69,6 +70,7 @@ export function buildSummary(
   }
 
   const withheldProposedCount = facts.filter((fact) => fact.status === "proposed").length;
+  const approvedDocuments = approvedFromConfirmed(documents, confirmed);
 
   return {
     patientName: patient.displayName,
@@ -92,7 +94,36 @@ export function buildSummary(
     unresolved,
     questions,
     withheldProposedCount,
+    approvedDocuments,
   };
+}
+
+const LINE_ORDER = ["document_date", "document_type", "facility", "measurement", "medication", "follow_up"];
+
+function approvedFromConfirmed(documents: DocumentRecord[], confirmed: Fact[]): ApprovedDocument[] {
+  return [...documents]
+    .sort((a, b) => a.documentDate.localeCompare(b.documentDate) || a.id.localeCompare(b.id))
+    .map((document) => {
+      const lines = confirmed
+        .filter((fact) => fact.documentId === document.id)
+        .sort(
+          (a, b) =>
+            LINE_ORDER.indexOf(a.kind) - LINE_ORDER.indexOf(b.kind) || a.id.localeCompare(b.id),
+        )
+        .map((fact) => ({
+          id: fact.id,
+          label: fact.label,
+          text: factDisplay(fact),
+        }));
+      return {
+        id: document.id,
+        documentDate: document.documentDate,
+        facilityName: document.facilityName,
+        documentType: document.documentType,
+        lines,
+      };
+    })
+    .filter((document) => document.lines.length > 0);
 }
 
 export function factDisplay(fact: Fact): string {

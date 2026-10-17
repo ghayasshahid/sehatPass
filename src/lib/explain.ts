@@ -58,8 +58,8 @@ export function explainFromConfirmed(
 
   return {
     ready: true,
-    english: `Across the confirmed reports, HbA1c was ${englishList(points)}. The recorded HbA1c ${englishDirection}. This is not a diagnosis and not a treatment recommendation. You may want to discuss this change with your doctor.`,
-    urdu: `آپ کی تصدیق شدہ رپورٹس میں HbA1c ${urduList(points)} تھا۔ ان رپورٹس میں HbA1c ${urduDirection}۔ یہ تشخیص نہیں ہے، اور یہ علاج کی تجویز نہیں ہے۔ اس تبدیلی کے بارے میں اپنے ڈاکٹر سے بات کریں۔`,
+    english: `Across the confirmed reports, HbA1c was ${englishList(points)}. The recorded HbA1c ${englishDirection}. This is not a diagnosis and not a treatment recommendation. Take this change to the next visit and show it to your doctor.`,
+    urdu: `آپ کی تصدیق شدہ رپورٹس میں HbA1c ${urduList(points)} تھا۔ ان رپورٹس میں HbA1c ${urduDirection}۔ یہ تشخیص نہیں ہے، اور یہ علاج کی تجویز نہیں ہے۔ اس تبدیلی کو اگلی ملاقات پر اپنے ڈاکٹر کو دکھائیں۔`,
     method: "template",
     disclosure,
   };
@@ -72,6 +72,8 @@ export function explanationIsGrounded(
 ): boolean {
   if (FUTURE_DISEASE.test(english) || FUTURE_DISEASE.test(urdu)) return false;
   if (!english.includes("doctor")) return false;
+  if (!/next visit/i.test(english)) return false;
+  if (!urdu.includes("اگلی")) return false;
   if (!urdu.includes("ڈاکٹر")) return false;
   if (!/not a diagnosis/i.test(english)) return false;
   if (!urdu.includes("تشخیص نہیں")) return false;

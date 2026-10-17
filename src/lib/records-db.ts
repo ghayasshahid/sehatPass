@@ -379,6 +379,30 @@ export function savePassport(
   }
 }
 
+export function invitationUploadOwner(
+  database: DatabaseSync,
+  token: string,
+  documentId: string,
+): string | null {
+  const row = database
+    .prepare(
+      `SELECT user_id, expires_at, snapshot_json FROM invitations WHERE token = ?`,
+    )
+    .get(token) as Record<string, SqlValue> | undefined;
+  if (!row) return null;
+  if (Date.parse(text(row.expires_at)) <= Date.now()) return null;
+  let snapshot: VisitSummary;
+  try {
+    snapshot = JSON.parse(text(row.snapshot_json)) as VisitSummary;
+  } catch {
+    return null;
+  }
+  const included = (snapshot.approvedDocuments ?? []).some((document) => document.id === documentId);
+  if (!included) return null;
+  const userId = text(row.user_id);
+  return userId || null;
+}
+
 export function findInvitation(
   database: DatabaseSync,
   token: string,

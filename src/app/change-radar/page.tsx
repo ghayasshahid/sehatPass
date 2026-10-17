@@ -69,6 +69,11 @@ export default function ChangeRadarPage() {
               <>
                 <Hba1cChart points={passport.change.points} />
                 <p className="text-lg leading-8">{passport.change.statement}</p>
+                {passport.matchingTests.map((series) => (
+                  <p key={`${series.label}-${series.unit}`} className="text-lg leading-8">
+                    {series.statement}
+                  </p>
+                ))}
                 {passport.change.delta !== null ? (
                   <p className="text-sm text-muted-foreground">
                     Difference between the earliest and latest confirmed reading: {passport.change.delta} percentage points. That figure is arithmetic, not an interpretation.

@@ -65,8 +65,8 @@ export default function DoctorViewPage({ params }: { params: Promise<{ token: st
         title="Approved summary"
         meaning={
           summary.patientName === "Sana Ahmed"
-            ? "Sana Ahmed is a fictional demo patient. You are seeing only the summary she approved. This page is the invitation, not the full record."
-            : `You are seeing only the summary ${summary.patientName} approved. This page is the invitation, not the full record.`
+            ? "Sana Ahmed is a fictional demo patient. You are seeing only the reports, prescriptions, and changes she approved for this invitation. Later edits are not added here."
+            : `You are seeing only the reports, prescriptions, and changes ${summary.patientName} approved for this invitation. Later edits are not added here.`
         }
       />
       {expiresAt ? (
@@ -74,7 +74,7 @@ export default function DoctorViewPage({ params }: { params: Promise<{ token: st
           This invitation expires {new Date(expiresAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.
         </p>
       ) : null}
-      <SummaryView summary={summary} audience="doctor" />
+      <SummaryView summary={summary} audience="doctor" invitationToken={token} />
       <p className="font-heading text-2xl leading-snug font-semibold">
         The patient changed hospitals. Their medical memory didn&apos;t disappear.
       </p>

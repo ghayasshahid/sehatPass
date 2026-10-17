@@ -1,19 +1,29 @@
 import Link from "next/link";
 
 import { StatusBadge } from "@/components/status-badge";
+import { documentTypeLabel, formatDate } from "@/lib/format";
 import type { VisitSummary } from "@/lib/types";
+
+function fileHref(documentId: string, invitationToken?: string): string {
+  if (invitationToken) {
+    return `/doctor/${invitationToken}/files/${documentId}`;
+  }
+  return `/reports/${documentId}?from=/doctor-pass`;
+}
 
 function SourceLink({
   documentId,
   label,
+  invitationToken,
 }: {
   documentId: string | null;
   label: string;
+  invitationToken?: string;
 }) {
   if (!documentId) return <p className="text-sm text-muted-foreground">{label}</p>;
   return (
     <Link
-      href={`/reports/${documentId}?from=/doctor-pass`}
+      href={fileHref(documentId, invitationToken)}
       className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
     >
       {label}
@@ -24,10 +34,13 @@ function SourceLink({
 export function SummaryView({
   summary,
   audience,
+  invitationToken,
 }: {
   summary: VisitSummary;
   audience: "patient" | "doctor";
+  invitationToken?: string;
 }) {
+  const documents = summary.approvedDocuments ?? [];
   return (
     <div className="grid gap-4">
       <section className="rounded-xl border border-border bg-card p-4">
@@ -54,7 +67,7 @@ export function SummaryView({
               <li key={item.id}>
                 <StatusBadge status={item.status} />
                 <p className="mt-1 font-medium">{item.text}</p>
-                <SourceLink documentId={item.documentId} label={item.sourceLabel} />
+                <SourceLink documentId={item.documentId} label={item.sourceLabel} invitationToken={invitationToken} />
               </li>
             ))}
           </ul>
@@ -74,10 +87,43 @@ export function SummaryView({
             <li key={item.id}>
               <StatusBadge status={item.status} />
               <p className="mt-1 font-medium">{item.text}</p>
-              <SourceLink documentId={item.documentId} label={item.sourceLabel} />
+              <SourceLink documentId={item.documentId} label={item.sourceLabel} invitationToken={invitationToken} />
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="rounded-xl border border-border bg-card p-4" data-testid="approved-timeline">
+        <h2 className="font-heading text-xl font-semibold">Approved reports and prescriptions</h2>
+        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+          Date order, across visits. Only confirmed lines are here.
+        </p>
+        {documents.length === 0 ? (
+          <p className="mt-3">No confirmed report or prescription is in this summary yet.</p>
+        ) : (
+          <ol className="mt-3 grid gap-4">
+            {documents.map((document) => (
+              <li key={document.id} className="rounded-lg bg-muted px-3 py-3">
+                <p className="text-sm font-semibold text-primary">{formatDate(document.documentDate)}</p>
+                <p className="font-semibold">{document.facilityName}</p>
+                <p className="text-sm text-muted-foreground">{documentTypeLabel(document.documentType)}</p>
+                <ul className="mt-2 grid gap-1">
+                  {document.lines.map((line) => (
+                    <li key={line.id}>
+                      {line.label}: {line.text}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={fileHref(document.id, invitationToken)}
+                  className="mt-2 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                >
+                  Open original file
+                </Link>
+              </li>
+            ))}
+          </ol>
+        )}
       </section>
 
       <section className="rounded-xl border border-border bg-card p-4" data-testid="recorded-change">
@@ -95,7 +141,7 @@ export function SummaryView({
               <li key={item.id}>
                 <StatusBadge status="unresolved" />
                 <p className="mt-2 leading-7">{item.text}</p>
-                <SourceLink documentId={item.documentId} label={item.sourceLabel} />
+                <SourceLink documentId={item.documentId} label={item.sourceLabel} invitationToken={invitationToken} />
               </li>
             ))}
           </ul>

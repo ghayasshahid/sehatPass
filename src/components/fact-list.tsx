@@ -128,6 +128,11 @@ export function FactList({
                     <p className="mt-1 text-sm">Corrected by the patient. Previous text: {fact.correctedFrom}</p>
                   ) : null}
                   <div className="mt-3 flex flex-wrap gap-2">
+                    {fact.status === "confirmed" ? (
+                      <Button asChild variant="outline" className={tap}>
+                        <Link href={`/reports/${document.id}?from=/`}>Open original file</Link>
+                      </Button>
+                    ) : null}
                     {fact.status !== "confirmed" ? (
                       <Button
                         className={tap}

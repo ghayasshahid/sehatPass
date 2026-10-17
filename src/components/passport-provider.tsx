@@ -25,6 +25,7 @@ interface PassportContextValue {
   confirmFact: (id: string) => Promise<void>;
   correctFact: (id: string, patch: FactPatch) => Promise<void>;
   confirmAll: () => Promise<void>;
+  uploadFiles: (files: File[]) => Promise<void>;
   markCurrent: (id: string, current: boolean) => Promise<void>;
   explain: () => Promise<Explanation>;
   approve: () => Promise<InvitationView>;
@@ -175,6 +176,15 @@ export function PassportProvider({ children }: { children: React.ReactNode }) {
       confirmAll: () =>
         run(async () => {
           await mutate("/api/facts/confirm-all", { method: "POST" });
+        }),
+      uploadFiles: (files) =>
+        run(async () => {
+          for (const file of files) {
+            const form = new FormData();
+            form.set("file", file);
+            form.set("confirmSend", "true");
+            await mutate("/api/extract", { method: "POST", body: form });
+          }
         }),
       markCurrent: (id, current) =>
         run(async () => {

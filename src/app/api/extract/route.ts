@@ -69,12 +69,22 @@ export async function POST(request: Request) {
       session.loaded = true;
       session.documents.push(extracted.document);
       session.facts.push(...extracted.facts);
-      session.extraction = {
-        method: "gemini",
-        label: "Gemini extraction",
-        disclosure:
-          "These fields were proposed by Gemini from the file you agreed to send. They are not confirmed. A valid structure is not proof the facts are correct.",
-      };
+      const hadSavedExtraction = session.documents.some(
+        (document) => document.extractionMethod === "cached_demo",
+      );
+      session.extraction = hadSavedExtraction
+        ? {
+            method: "gemini",
+            label: "Gemini extraction added",
+            disclosure:
+              "The new file was proposed by Gemini after you agreed to send it. The fictional documents remain the saved extraction. None of these fields are confirmed, and a valid structure is not proof the facts are correct.",
+          }
+        : {
+            method: "gemini",
+            label: "Gemini extraction",
+            disclosure:
+              "These fields were proposed by Gemini from the file you agreed to send. They are not confirmed. A valid structure is not proof the facts are correct.",
+          };
       return present(session);
     });
     return ok({ passport, sent: true });

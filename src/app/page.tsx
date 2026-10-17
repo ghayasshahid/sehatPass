@@ -21,8 +21,8 @@ import { BUNDLED_INDEX } from "@/lib/demo-case";
 const tap = "min-h-12 px-4 text-base";
 
 export default function VerifyPage() {
-  const { passport, loading, busy, loadFictional, reset, confirmAll } = usePassport();
-  const [file, setFile] = useState<File | null>(null);
+  const { passport, loading, busy, loadFictional, reset, confirmAll, uploadFiles } = usePassport();
+  const [files, setFiles] = useState<File[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   if (loading) {
@@ -34,19 +34,15 @@ export default function VerifyPage() {
 
   const proposed = passport.facts.filter((fact) => fact.status === "proposed").length;
 
-  async function sendFile() {
-    if (!file) return;
+  async function sendFiles() {
+    if (files.length === 0) return;
     setUploadError(null);
-    const form = new FormData();
-    form.set("file", file);
-    form.set("confirmSend", "true");
-    const response = await fetch("/api/extract", { method: "POST", body: form });
-    const body = (await response.json().catch(() => ({}))) as { error?: string };
-    if (!response.ok) {
-      setUploadError(body.error || "The file was not extracted.");
-      return;
+    try {
+      await uploadFiles(files);
+      setFiles([]);
+    } catch (reason) {
+      setUploadError(reason instanceof Error ? reason.message : "The files were not extracted.");
     }
-    window.location.reload();
   }
 
   return (
@@ -86,47 +82,18 @@ export default function VerifyPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-dashed border-border bg-card p-4">
-            <h2 className="font-heading text-xl font-semibold">Or add a photo or PDF</h2>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              A paper report can be photographed. The file stays on this device until you explicitly send it.
-            </p>
-            <label className="mt-3 block">
-              <span className="sr-only">Choose a photo or PDF</span>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp,application/pdf"
-                className="block w-full text-sm"
-                onChange={(event) => {
-                  setFile(event.target.files?.[0] ?? null);
-                  setUploadError(null);
-                }}
-              />
-            </label>
-            {file ? (
-              <Alert className="mt-3">
-                <AlertTitle>Not sent</AlertTitle>
-                <AlertDescription>
-                  <p>
-                    {file.name} · {file.type || "unknown type"} · {Math.ceil(file.size / 1024)} KB. This file is still on this device.
-                  </p>
-                  <p className="mt-2">
-                    If you continue with a configured Gemini key, SehatPass would send this file and an extraction instruction to Google Gemini. Other records would not be included. You would still confirm every field.
-                  </p>
-                  {passport.providers.gemini ? (
-                    <Button className={`mt-3 ${tap}`} disabled={busy} onClick={() => void sendFile()}>
-                      Send this file to Gemini
-                    </Button>
-                  ) : (
-                    <p className="mt-2 font-medium">
-                      No GEMINI_API_KEY is set. This file will not be sent. The fictional demo uses the saved extraction.
-                    </p>
-                  )}
-                  {uploadError ? <p className="mt-2 text-destructive">{uploadError}</p> : null}
-                </AlertDescription>
-              </Alert>
-            ) : null}
-          </div>
+          <VisitFiles
+            heading="Or add photos or PDFs"
+            files={files}
+            gemini={passport.providers.gemini}
+            busy={busy}
+            uploadError={uploadError}
+            onChoose={(chosen) => {
+              setFiles(chosen);
+              setUploadError(null);
+            }}
+            onSend={() => void sendFiles()}
+          />
         </section>
       ) : (
         <section className="chapter-body grid gap-4">
@@ -136,6 +103,18 @@ export default function VerifyPage() {
               <AlertDescription>{passport.extraction.disclosure}</AlertDescription>
             </Alert>
           ) : null}
+          <VisitFiles
+            heading="Add files from another visit"
+            files={files}
+            gemini={passport.providers.gemini}
+            busy={busy}
+            uploadError={uploadError}
+            onChoose={(chosen) => {
+              setFiles(chosen);
+              setUploadError(null);
+            }}
+            onSend={() => void sendFiles()}
+          />
           <FactList documents={passport.documents} facts={passport.facts} />
           {proposed > 0 ? (
             <div className="rounded-2xl border border-border bg-secondary p-4">
@@ -179,6 +158,72 @@ export default function VerifyPage() {
           </Dialog>
         </section>
       )}
+    </div>
+  );
+}
+
+function VisitFiles({
+  heading,
+  files,
+  gemini,
+  busy,
+  uploadError,
+  onChoose,
+  onSend,
+}: {
+  heading: string;
+  files: File[];
+  gemini: boolean;
+  busy: boolean;
+  uploadError: string | null;
+  onChoose: (files: File[]) => void;
+  onSend: () => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-card p-4">
+      <h2 className="font-heading text-xl font-semibold">{heading}</h2>
+      <p className="mt-1 text-sm leading-6 text-muted-foreground">
+        Add every report and prescription from the visit. Photo or PDF, more than one file. The files stay on this device until you explicitly send them.
+      </p>
+      <label className="mt-3 block">
+        <span className="sr-only">Choose photos or PDFs</span>
+        <input
+          key={files.map((file) => `${file.name}:${file.size}`).join("|") || "empty"}
+          type="file"
+          multiple
+          accept="image/jpeg,image/png,image/webp,application/pdf"
+          className="block w-full text-sm"
+          onChange={(event) => onChoose([...(event.target.files ?? [])])}
+        />
+      </label>
+      {files.length > 0 ? (
+        <Alert className="mt-3">
+          <AlertTitle>Not sent</AlertTitle>
+          <AlertDescription>
+            <ul className="grid gap-1">
+              {files.map((file) => (
+                <li key={`${file.name}:${file.size}`}>
+                  {file.name} · {file.type || "unknown type"} · {Math.ceil(file.size / 1024)} KB
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2">These files are still on this device.</p>
+            <p className="mt-2">
+              If you continue with a configured Gemini key, SehatPass would send each file and an extraction instruction to Google Gemini. Other records would not be included. You would still confirm every field.
+            </p>
+            {gemini ? (
+              <Button className={`mt-3 ${tap}`} disabled={busy} onClick={onSend}>
+                Send these files to Gemini
+              </Button>
+            ) : (
+              <p className="mt-2 font-medium">
+                No GEMINI_API_KEY is set. These files will not be sent. The fictional demo uses the saved extraction.
+              </p>
+            )}
+            {uploadError ? <p className="mt-2 text-destructive">{uploadError}</p> : null}
+          </AlertDescription>
+        </Alert>
+      ) : null}
     </div>
   );
 }

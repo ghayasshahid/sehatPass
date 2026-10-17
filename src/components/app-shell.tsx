@@ -69,7 +69,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ) : (
             <p className="mt-6 text-base leading-6 font-medium">
               {doctorView
-                ? "This page shows only the summary the patient approved."
+                ? "This page shows only what the patient approved for this invitation."
                 : "Your next doctor should know what your last doctor knew."}
             </p>
           )}

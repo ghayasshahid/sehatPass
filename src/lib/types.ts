@@ -96,6 +96,20 @@ export interface SummaryItem {
   status: ConfirmationStatus;
 }
 
+export interface ApprovedLine {
+  id: string;
+  label: string;
+  text: string;
+}
+
+export interface ApprovedDocument {
+  id: string;
+  documentDate: string;
+  facilityName: string;
+  documentType: DocumentType;
+  lines: ApprovedLine[];
+}
+
 export interface VisitSummary {
   patientName: string;
   fictional: true;
@@ -112,6 +126,7 @@ export interface VisitSummary {
   unresolved: SummaryItem[];
   questions: string[];
   withheldProposedCount: number;
+  approvedDocuments: ApprovedDocument[];
 }
 
 export interface Invitation {
@@ -176,6 +191,12 @@ export interface InvitationView {
   qrDataUrl: string;
 }
 
+export interface MatchingTest {
+  label: string;
+  unit: string;
+  statement: string;
+}
+
 export interface PassportView {
   patient: Patient;
   loaded: boolean;
@@ -186,6 +207,7 @@ export interface PassportView {
   invitations: InvitationView[];
   summary: VisitSummary;
   change: ChangeResult;
+  matchingTests: MatchingTest[];
   providers: {
     gemini: boolean;
     groq: boolean;
