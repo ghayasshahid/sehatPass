@@ -16,8 +16,9 @@ const ALLOWED = new Set([
 const MAX_BYTES = 4 * 1024 * 1024;
 
 export async function POST(request: Request) {
+  let owner;
   try {
-    await requireUser();
+    owner = await requireUser();
   } catch (error) {
     return failFrom(error, "Sign in to add a document.");
   }
@@ -54,7 +55,6 @@ export async function POST(request: Request) {
 
   try {
     const bytes = Buffer.from(await file.arrayBuffer());
-    const owner = await requireUser();
     const previewSession = await withSession(async (session) => session, false);
     const extracted = await extractWithGemini({
       filename: file.name,
