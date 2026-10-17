@@ -67,7 +67,10 @@ export function PassportProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        const me = await fetch("/api/auth/me", { cache: "no-store" });
+        const [me, passportResponse] = await Promise.all([
+          fetch("/api/auth/me", { cache: "no-store" }),
+          fetch("/api/passport", { cache: "no-store" }),
+        ]);
         if (cancelled) return;
         if (!me.ok) {
           setUser(null);
@@ -77,10 +80,16 @@ export function PassportProvider({ children }: { children: React.ReactNode }) {
         const body = (await me.json()) as { user?: Account };
         if (!body.user) {
           setUser(null);
+          setPassport(null);
           return;
         }
         setUser(body.user);
-        await reload();
+        if (passportResponse.status === 401) {
+          setPassport(null);
+          return;
+        }
+        const passportBody = await readJson(passportResponse);
+        if (passportBody.passport) setPassport(passportBody.passport);
       } catch (reason: unknown) {
         if (!cancelled) {
           setError(reason instanceof Error ? reason.message : "The passport could not be loaded.");
@@ -92,7 +101,7 @@ export function PassportProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [reload]);
+  }, []);
 
   const run = useCallback(async <T,>(task: () => Promise<T>) => {
     setBusy(true);
