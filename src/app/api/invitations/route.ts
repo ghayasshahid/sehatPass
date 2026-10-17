@@ -3,6 +3,7 @@ import { randomBytes } from "crypto";
 import { compareHbA1c } from "@/lib/changes";
 import { deriveDiscrepancies } from "@/lib/discrepancies";
 import { invitationUrl, requestOrigin, safeOrigin } from "@/lib/format";
+import { phoneOrigin } from "@/lib/lan";
 import { failFrom, ok } from "@/lib/http";
 import { present } from "@/lib/present";
 import { buildSummary } from "@/lib/summary";
@@ -15,7 +16,7 @@ const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as { origin?: string } | null;
-  const origin = safeOrigin(body?.origin, requestOrigin(request));
+  const origin = phoneOrigin(safeOrigin(body?.origin, requestOrigin(request)));
 
   try {
     const result = await withSession(async (session) => {

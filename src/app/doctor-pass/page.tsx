@@ -108,7 +108,7 @@ export default function DoctorPassPage() {
             <section className="rounded-2xl border border-border bg-card p-4 text-center" data-testid="invitation">
               <h2 className="font-heading text-2xl font-semibold">Invitation</h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                This code does not contain the medical record. It opens only the summary that was approved.
+                Scan it from a phone on this Wi-Fi. The code does not contain the medical record. It opens only the summary that was approved.
                 {latest.expired ? " This invitation has expired." : ` It expires ${new Date(latest.expiresAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.`}
               </p>
               {/* Data-URL QR generated for this invitation. It encodes only the doctor link. */}

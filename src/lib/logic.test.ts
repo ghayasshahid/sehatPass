@@ -5,7 +5,7 @@ import { compareHbA1c, compareMatchingTests } from "@/lib/changes";
 import { createFictionalRecords, PATIENT } from "@/lib/demo-case";
 import { deriveDiscrepancies } from "@/lib/discrepancies";
 import { explainFromConfirmed, explanationIsGrounded } from "@/lib/explain";
-import { invitationUrl } from "@/lib/format";
+import { invitationUrl, originForPhone } from "@/lib/format";
 import { hashPassword, verifyPassword } from "@/lib/passwords";
 import {
   findInvitation,
@@ -207,6 +207,12 @@ describe("explanation and invitation", () => {
     const url = invitationUrl("http://127.0.0.1:4721", token);
     assert.equal(url, "http://127.0.0.1:4721/doctor/abc123XYZ");
     assert.doesNotMatch(url, /7\.2|metformin|hba1c/i);
+    const phone = originForPhone("http://127.0.0.1:4721", "192.168.1.20");
+    assert.equal(phone, "http://192.168.1.20:4721");
+    assert.equal(originForPhone("http://localhost:4721", "10.0.0.8"), "http://10.0.0.8:4721");
+    assert.equal(originForPhone("https://sehat.example", "192.168.1.20"), "https://sehat.example");
+    assert.equal(originForPhone("http://127.0.0.1:4721", null), "http://127.0.0.1:4721");
+    assert.doesNotMatch(`${phone}/doctor/abc123XYZ`, /7\.2|metformin|hba1c/i);
   });
 });
 

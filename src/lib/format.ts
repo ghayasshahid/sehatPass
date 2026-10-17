@@ -101,6 +101,19 @@ export function invitationUrl(origin: string, token: string): string {
   return `${origin}/doctor/${token}`;
 }
 
+export function originForPhone(origin: string, lanAddress: string | null): string {
+  let url: URL;
+  try {
+    url = new URL(origin);
+  } catch {
+    return origin;
+  }
+  const loopback = url.hostname === "localhost" || url.hostname === "127.0.0.1" || url.hostname === "::1";
+  if (!loopback || !lanAddress) return url.origin;
+  url.hostname = lanAddress;
+  return url.origin;
+}
+
 export function safeOrigin(input: unknown, fallback: string): string {
   if (typeof input !== "string") return fallback;
   try {

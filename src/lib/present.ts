@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 
 import { compareHbA1c, compareMatchingTests } from "@/lib/changes";
 import { deriveDiscrepancies } from "@/lib/discrepancies";
+import { phoneOrigin } from "@/lib/lan";
 import { buildSummary } from "@/lib/summary";
 import { applyConfirmedMeta } from "@/lib/store";
 import type { PassportView, Session } from "@/lib/types";
@@ -15,18 +16,21 @@ export async function present(session: Session): Promise<PassportView> {
   const matchingTests = compareMatchingTests(session.facts, session.documents);
   const summary = buildSummary(session, change, null);
   const invitations = await Promise.all(
-    session.invitations.map(async (invitation) => ({
-      token: invitation.token,
-      url: invitation.url,
-      createdAt: invitation.createdAt,
-      expiresAt: invitation.expiresAt,
-      expired: Date.parse(invitation.expiresAt) <= Date.now(),
-      qrDataUrl: await QRCode.toDataURL(invitation.url, {
-        margin: 1,
-        width: 320,
-        errorCorrectionLevel: "M",
-      }),
-    })),
+    session.invitations.map(async (invitation) => {
+      const url = phoneOrigin(invitation.url);
+      return {
+        token: invitation.token,
+        url,
+        createdAt: invitation.createdAt,
+        expiresAt: invitation.expiresAt,
+        expired: Date.parse(invitation.expiresAt) <= Date.now(),
+        qrDataUrl: await QRCode.toDataURL(url, {
+          margin: 1,
+          width: 320,
+          errorCorrectionLevel: "M",
+        }),
+      };
+    }),
   );
 
   return {
