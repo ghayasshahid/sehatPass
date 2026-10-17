@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import { ChapterHeader, chapters } from "@/components/chapter-header";
 import { FactList } from "@/components/fact-list";
 import { usePassport } from "@/components/passport-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -51,9 +50,27 @@ export default function VerifyPage() {
 
   return (
     <div className="grid gap-8">
-      <ChapterHeader {...chapters[0]} />
-      <p className="chapter-body -mt-4 text-sm leading-6 text-muted-foreground">
-        Sana Ahmed, fictional, Lahore. Diabetes follow-up across four facilities.
+      <h1 className="max-w-[12ch] text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.95] font-medium tracking-[-0.025em]">
+        Confirm the papers
+      </h1>
+      <section className="stairs">
+        <p>These lines</p>
+        <p>were read</p>
+        <p>from the papers.</p>
+        <p>They stay proposed</p>
+        <p>until you confirm.</p>
+      </section>
+      <p className="max-w-xl text-base leading-7">
+        Sana Ahmed, fictional, Lahore. Diabetes follow-up across four facilities. Upload and verify is this screen.
+      </p>
+      <figure className="plates">
+        <img src="/atmosphere/field.jpg" alt="Hay bales under a white sky. Photograph by Pavel Voinov." />
+        <img src="/atmosphere/marsh.jpg" alt="Marshland and pines under a pale sky. Photograph by Caroline Sada." />
+        <img src="/atmosphere/ships.jpg" alt="Three ships on a calm horizon. Photograph by John Maravelakis." />
+        <img src="/atmosphere/island.jpg" alt="A small island on a glassy sea. Photograph by Ivan Slade." />
+      </figure>
+      <p className="text-sm leading-6 text-muted-foreground">
+        Weather, not the clinics and not the patient. Pavel Voinov, Caroline Sada, John Maravelakis, and Ivan Slade, via Unsplash.
       </p>
 
       {!passport.loaded ? (
