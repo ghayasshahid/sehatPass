@@ -47,6 +47,12 @@ export function FactList({
   facts: Fact[];
 }) {
   const { busy, confirmFact, correctFact } = usePassport();
+  const factsByDocument = new Map<string, Fact[]>();
+  for (const fact of facts) {
+    const rows = factsByDocument.get(fact.documentId);
+    if (rows) rows.push(fact);
+    else factsByDocument.set(fact.documentId, [fact]);
+  }
   const [editing, setEditing] = useState<Fact | null>(null);
   const [patch, setPatch] = useState<FactPatch>({});
 
@@ -72,7 +78,7 @@ export function FactList({
   return (
     <div className="grid gap-5">
       {documents.map((document) => {
-        const rows = facts.filter((fact) => fact.documentId === document.id);
+        const rows = factsByDocument.get(document.id) ?? [];
         return (
           <article key={document.id} className="rounded-md border border-border bg-card p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
