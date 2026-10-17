@@ -54,8 +54,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const bytes = Buffer.from(await file.arrayBuffer());
-    const previewSession = await withSession(async (session) => session, false);
+    const [bytes, previewSession] = await Promise.all([
+      file.arrayBuffer().then((buffer) => Buffer.from(buffer)),
+      withSession(async (session) => session, false),
+    ]);
     const extracted = await extractWithGemini({
       filename: file.name,
       mimeType: file.type,
